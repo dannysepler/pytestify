@@ -2,8 +2,6 @@ repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.0.1
     hooks:
-    -   id: check-docstring-first
-    -   id: check-yaml
     -   id: debug-statements
     -   id: double-quote-string-fixer
     -   id: end-of-file-fixer
@@ -28,7 +26,7 @@ repos:
     -   id: add-trailing-comma
         args: [--py36-plus]
 -   repo: https://github.com/asottile/pyupgrade
-    rev: v2.20.0
+    rev: v2.21.0
     hooks:
     -   id: pyupgrade
         args: [--py36-plus]
@@ -37,9 +35,8 @@ repos:
     hooks:
     -   id: mypy
         exclude: ^tests/
-
 -   repo: https://github.com/pycqa/isort
-    rev: 5.8.0
+    rev: 5.9.2
     hooks:
       - id: isort
         name: isort

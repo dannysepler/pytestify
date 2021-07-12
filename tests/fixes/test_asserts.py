@@ -15,7 +15,9 @@ from pytestify.fixes.asserts import rewrite_asserts
         ('self.assertEquals(1, 1)', 'assert 1 == 1'),
         ('self.assertEqual(1, 1)', 'assert 1 == 1'),
         ('self.assertNotEqual(1, 2)', 'assert 1 != 2'),
-        ('self.assertListEqual([1], [1])', 'assert [1] == [1]'),
+        ('self.assertListEqual(a, b)', 'assert a == b'),
+        ('self.assertSetEqual(a, b)', 'assert a == b'),
+        ('self.assertItemsEqual(a, b)', 'assert sorted(a) == sorted(b)'),
         ('self.assertIs(a, b)', 'assert a is b'),
         ('self.assertIsNot(a, b)', 'assert a is not b'),
         ('self.assertIn(a, b)', 'assert a in b'),
@@ -44,6 +46,26 @@ def test_rewrite_simple_asserts(before, after):
             'self.assertEqual(1, 1)\n',
             'assert min(1, 2, 3) == 1\n'
             'assert 1 == 1',
+        ),
+        (
+            'try:\n'
+            '    pass\n'
+            'except SomeException:\n'
+            '    self.assertEqual(1, 1)',
+            'try:\n'
+            '    pass\n'
+            'except SomeException:\n'
+            '    assert 1 == 1',
+        ),
+        (
+            'if a == b:\n'
+            '    pass\n'
+            'else:\n'
+            '    self.assertEqual(1, 1)',
+            'if a == b:\n'
+            '    pass\n'
+            'else:\n'
+            '    assert 1 == 1',
         ),
     ],
 )

@@ -4,6 +4,9 @@ from typing import List, NamedTuple
 from tokenize_rt import Token, src_to_tokens
 
 from pytestify._ast_helpers import elems_of_type
+from pytestify._token_helpers import (
+    find_closing_paren, find_outer_comma, remove_token,
+)
 
 
 class _Assert(NamedTuple):
@@ -30,6 +33,8 @@ ASSERT_TYPES = {
     'assertIn': _Assert('binary', op=' in'),
     'assertNotIn': _Assert('binary', op=' not in'),
     'assertListEqual': _Assert('binary', op=' =='),
+    'assertDictEqual': _Assert('binary', op=' =='),
+    'assertSetEqual': _Assert('binary', op=' =='),
     'assertGreater': _Assert('binary', op=' >'),
     'assertLess': _Assert('binary', op=' <'),
     'assertGreaterEqual': _Assert('binary', op=' >='),
@@ -39,6 +44,13 @@ ASSERT_TYPES = {
         'binary',
         prefix='not ',
         op='.search(',
+        suffix=')',
+        strip=True,
+    ),
+    'assertItemsEqual': _Assert(
+        'binary',
+        prefix='sorted(',
+        op=') == sorted(',
         suffix=')',
         strip=True,
     ),
@@ -93,50 +105,6 @@ def get_asserts(contents: str, tokens: List[Token]) -> List[Call]:
     return calls
 
 
-def remove_token(
-    line: str,
-    token: Token,
-    replace_with: str = '',
-    offset: int = 0,
-    strip: bool = False,
-) -> str:
-    loc = token.utf8_byte_offset + offset
-    before = line[:loc]
-    after = line[loc+1:]
-    if strip:
-        before = before.rstrip(' ')
-        after = after.lstrip(' ')
-    return before + replace_with + after
-
-
-def find_outer_comma(operators: List[Token]) -> Token:
-    stack = 0
-    for op in operators:
-        if op.src == '(':
-            stack += 1
-        if op.src == ')':
-            stack -= 1
-        if op.src == ',' and stack in (0, 1):
-            return op
-    raise ValueError('No outer comma found')
-
-
-def find_closing_paren(paren: Token, operators: List[Token]) -> Token:
-    found_paren = False
-    stack = 1
-    for op in operators:
-        if op == paren:
-            found_paren = True
-            continue
-        if found_paren and op.src == '(':
-            stack += 1
-        if found_paren and op.src == ')':
-            stack -= 1
-            if stack == 0:
-                return op
-    raise ValueError('No closing parenthesis was found')
-
-
 def rewrite_asserts(contents: str) -> str:
     tokens = src_to_tokens(contents)
     asserts = get_asserts(contents, tokens)
@@ -148,7 +116,6 @@ def rewrite_asserts(contents: str) -> str:
             tok for i, tok in enumerate(tokens)
             if i > _assert.token_idx and tok.name == 'OP'
         ]
-        # print(ops_after)
 
         # if one line, strip the outer parentheses
         if _assert.line_length == 1:
