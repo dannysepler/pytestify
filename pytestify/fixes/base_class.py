@@ -1,5 +1,5 @@
 import ast
-from typing import List, NamedTuple
+from typing import List, NamedTuple, Union
 
 from pytestify._ast_helpers import elems_of_type
 
@@ -9,10 +9,11 @@ class TestClass(NamedTuple):
     line: int
 
 
-def is_test_class(base: ast.Attribute) -> bool:
-    if hasattr(base, 'value'):
+def is_test_class(base: Union[ast.Attribute, ast.Name]) -> bool:
+    if isinstance(base, ast.Attribute):
         # looks like 'class MyClass(a.b):'
-        return base.value.id == 'unittest' and base.attr == 'TestCase'
+        base_id = getattr(base.value, 'id', None)
+        return base_id == 'unittest' and base.attr == 'TestCase'
     else:
         # looks like 'class MyClass(a):'
         return base.id == 'TestCase'

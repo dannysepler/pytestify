@@ -1,6 +1,6 @@
 import ast
 import warnings
-from typing import List
+from typing import Any, List
 
 
 def ast_parse(contents: str) -> ast.Module:
@@ -9,7 +9,7 @@ def ast_parse(contents: str) -> ast.Module:
         return ast.parse(contents.encode())
 
 
-def elems_of_type(contents: str, elem_type: ast.stmt) -> List[ast.stmt]:
+def elems_of_type(contents: str, elem_type: Any) -> List[Any]:
     module = ast_parse(contents)
     queue = set(module.body)
     elems = []
@@ -17,6 +17,6 @@ def elems_of_type(contents: str, elem_type: ast.stmt) -> List[ast.stmt]:
         elem = queue.pop()
         if isinstance(elem, elem_type):
             elems.append(elem)
-        if hasattr(elem, 'body'):
-            queue |= set(elem.body)
+        child_elems = getattr(elem, 'body', [])
+        queue |= set(child_elems)
     return elems

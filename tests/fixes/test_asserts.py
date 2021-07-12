@@ -28,7 +28,26 @@ from pytestify.fixes.asserts import rewrite_asserts
         ('self.assertNotRegex(a, b)', 'assert not a.search(b)'),
     ],
 )
-def test_rewrite_asserts(before, after):
+def test_rewrite_simple_asserts(before, after):
+    assert rewrite_asserts(before) == after
+
+
+@pytest.mark.parametrize(
+    'before, after', [
+        ('self.assertEqual(len(a), len(b))', 'assert len(a) == len(b)'),
+        (
+            'self.assertEqual(min(1, 2, 3), min(1, 2, 3))',
+            'assert min(1, 2, 3) == min(1, 2, 3)',
+        ),
+        (
+            'self.assertEqual(min(1, 2, 3), 1)\n'
+            'self.assertEqual(1, 1)\n',
+            'assert min(1, 2, 3) == 1\n'
+            'assert 1 == 1',
+        ),
+    ],
+)
+def test_rewrite_complex_asserts(before, after):
     assert rewrite_asserts(before) == after
 
 
@@ -38,7 +57,7 @@ def test_rewrite_asserts(before, after):
         'self.someFunction()',
         'assertEqual(a, b)',
 
-        # unsupported things
+        # unsupported functions
         'self.assertCountEqual(a, b)',
     ],
 )

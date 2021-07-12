@@ -71,11 +71,11 @@ def get_asserts(contents: str, tokens: List[Token]) -> List[Call]:
         call = expr.value
         if not isinstance(call, ast.Call):
             continue
-        if not hasattr(call.func, 'attr'):
+        method = getattr(call.func, 'attr', None)
+        if not method:
             # this occurs when the method is not called from 'self' --
             # we should skip these occurrences
             continue
-        method = call.func.attr
         if method not in ASSERT_TYPES:
             continue
 
@@ -109,6 +109,34 @@ def remove_token(
     return before + replace_with + after
 
 
+def find_outer_comma(operators: List[Token]) -> Token:
+    stack = 0
+    for op in operators:
+        if op.src == '(':
+            stack += 1
+        if op.src == ')':
+            stack -= 1
+        if op.src == ',' and stack in (0, 1):
+            return op
+    raise ValueError('No outer comma found')
+
+
+def find_closing_paren(paren: Token, operators: List[Token]) -> Token:
+    found_paren = False
+    stack = 1
+    for op in operators:
+        if op == paren:
+            found_paren = True
+            continue
+        if found_paren and op.src == '(':
+            stack += 1
+        if found_paren and op.src == ')':
+            stack -= 1
+            if stack == 0:
+                return op
+    raise ValueError('No closing parenthesis was found')
+
+
 def rewrite_asserts(contents: str) -> str:
     tokens = src_to_tokens(contents)
     asserts = get_asserts(contents, tokens)
@@ -116,26 +144,21 @@ def rewrite_asserts(contents: str) -> str:
     for _assert in asserts:
         offset = 0
         assert_type = ASSERT_TYPES[_assert.name]
-        tokens_after = [
-            tok for i, tok in enumerate(
-                tokens,
-            ) if i > _assert.token_idx
+        ops_after = [
+            tok for i, tok in enumerate(tokens)
+            if i > _assert.token_idx and tok.name == 'OP'
         ]
+        # print(ops_after)
 
-        # if one line, strip parentheses
+        # if one line, strip the outer parentheses
         if _assert.line_length == 1:
-            open_paren = next(
-                t for t in tokens_after if t.name == 'OP' and t.src == '('
-            )
-            close_paren = next(
-                t for t in tokens_after if t.name == 'OP' and t.src == ')'
-            )
+            open_paren = next(t for t in ops_after if t.src == '(')
+            closing_paren = find_closing_paren(open_paren, ops_after)
 
             line = content_list[_assert.line]
-            for token in [close_paren, open_paren]:
-                line = remove_token(line, token)
-
-            offset -= 1  # removing the open paren offsets the line by one
+            line = remove_token(line, open_paren, offset=offset)
+            offset -= 1  # removing the open paren shifts all chars left
+            line = remove_token(line, closing_paren, offset=offset)
             content_list[_assert.line] = line
 
         # for equality comparators, turn the next comma into ' ==', etc
@@ -143,10 +166,7 @@ def rewrite_asserts(contents: str) -> str:
             operator = assert_type.op
             strip = assert_type.strip
 
-            comma = next(
-                t for t in tokens_after if t.name ==
-                'OP' and t.src == ','
-            )
+            comma = find_outer_comma(ops_after)
             i = comma.line - 1
             line = content_list[i]
             line = remove_token(
