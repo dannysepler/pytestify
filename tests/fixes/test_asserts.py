@@ -28,6 +28,7 @@ from pytestify.fixes.asserts import rewrite_asserts
         ('self.assertLessEqual(a, b)', 'assert a <= b'),
         ('self.assertRegex(a, b)', 'assert a.search(b)'),
         ('self.assertNotRegex(a, b)', 'assert not a.search(b)'),
+        ('self.assertIsInstance(a, b)', 'assert isinstance(a, b)'),
     ],
 )
 def test_rewrite_simple_asserts(before, after):
@@ -67,9 +68,75 @@ def test_rewrite_simple_asserts(before, after):
             'else:\n'
             '    assert 1 == 1',
         ),
+        (
+            'self.assertIsNone(\n'
+            '    a\n'
+            ')',
+            'assert \\\n'
+            '    a is None\n'
+            '',
+        ),
+        (
+            'self.assertEqual(\n'
+            '    a,\n'
+            '    [\n'
+            '        1,\n'
+            '        2,\n'
+            '    ]\n'
+            ')',
+            'assert \\\n'
+            '    a == \\\n'
+            '    [ \\\n'
+            '        1, \\\n'
+            '        2, \\\n'
+            '    ]\n'
+            '',
+        ),
     ],
 )
 def test_rewrite_complex_asserts(before, after):
+    assert rewrite_asserts(before) == after
+
+
+@pytest.mark.parametrize(
+    'before, after', [
+        (
+            "self.assertEquals(a, b, msg='Error')",
+            "assert a == b, 'Error'",
+        ),
+        (
+            "self.assertEquals(a, b, msg = 'Error')",
+            "assert a == b, 'Error'",
+        ),
+        (
+            "self.assertEquals(a, b, msg     =     'Error')",
+            "assert a == b, 'Error'",
+        ),
+        (
+            'self.assertEquals(\n'
+            '   a,\n'
+            '   b,\n'
+            "   msg='Error'\n"
+            ')',
+            'assert \\\n'
+            '   a == \\\n'
+            '   b, \\\n'
+            "   'Error'\n"
+            '',
+        ),
+        (
+            'self.assertEquals(\n'
+            '   a.func(),\n'
+            '   b\n'
+            ')',
+            'assert \\\n'
+            '   a.func() == \\\n'
+            '   b\n'
+            '',
+        ),
+    ],
+)
+def test_remove_msg_param(before, after):
     assert rewrite_asserts(before) == after
 
 

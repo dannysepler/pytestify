@@ -1,4 +1,5 @@
 import ast
+import re
 from typing import List, NamedTuple
 
 from tokenize_rt import Token, src_to_tokens
@@ -54,6 +55,12 @@ ASSERT_TYPES = {
         suffix=')',
         strip=True,
     ),
+    'assertIsInstance': _Assert(
+        'binary',
+        prefix='isinstance(',
+        op=',',
+        suffix=')',
+    ),
 }
 
 ALIASES = {
@@ -66,18 +73,26 @@ for alias, orig in ALIASES.items():
     ASSERT_TYPES[alias] = ASSERT_TYPES[orig]
 
 
-class Call(NamedTuple):
-    name: str
-    line: int
-    token_idx: int
-    close_paren_line: int
+class Call:
+    def __init__(
+        self,
+        name: str,
+        line: int,
+        token_idx: int,
+        end_line: int,
+    ):
+        self.name = name
+        self.line = line
+        self.token_idx = token_idx
+        self.end_line = end_line
+        self.offset = 0
 
     @property
     def line_length(self) -> int:
-        return self.close_paren_line - self.line
+        return (self.end_line - self.line) + 1
 
 
-def get_asserts(contents: str, tokens: List[Token]) -> List[Call]:
+def get_calls(contents: str, tokens: List[Token]) -> List[Call]:
     calls = []
     for expr in elems_of_type(contents, ast.Expr):
         call = expr.value
@@ -92,41 +107,96 @@ def get_asserts(contents: str, tokens: List[Token]) -> List[Call]:
             continue
 
         line = call.lineno
-        token_idx = next(
+        call_idx = next(
             line_no for line_no, tok in enumerate(tokens)
             if tok.src == method and tok.line == line
         )
-        close_paren_line = next(
-            tok.line for tok in tokens
-            if tok.name == 'OP' and tok.src == ')'
-            and tok.line >= line
-        )
-        calls.append(Call(method, line - 1, token_idx, close_paren_line))
+
+        operators = [
+            t for i, t in enumerate(
+                tokens,
+            ) if i >= call_idx and t.name == 'OP'
+        ]
+        open_paren = next(t for t in operators if t.src == '(')
+        close_paren = find_closing_paren(open_paren, operators)
+        end_line = close_paren.line
+        calls.append(Call(method, line - 1, call_idx, end_line - 1))
     return calls
+
+
+def rewrite_parens(
+    operators: List[Token],
+    call: Call,
+    content_list: List[str],
+) -> None:
+    '''
+    For single line asserts, remove parantheses
+    For multi-line asserts, convert parantheses to slashes
+    '''
+    open_paren = next(t for t in operators if t.src == '(')
+    closing_paren = find_closing_paren(open_paren, operators)
+
+    start_line = content_list[call.line]
+    start_line = remove_token(start_line, open_paren, offset=call.offset)
+    content_list[call.line] = start_line
+
+    if call.line_length == 1:
+        call.offset -= 1  # removing the open paren shifts all chars left
+
+    end_line = content_list[call.end_line]
+    end_line = remove_token(
+        end_line, closing_paren,
+        offset=call.offset, strip=True,
+    )
+    content_list[call.end_line] = end_line
+
+    last_assert_line = content_list[call.end_line]
+    for i in range(call.line, call.end_line):
+        line = content_list[i]
+
+        # skip the assertion line as it will add its own space
+        if i > call.line:
+            line += ' '
+
+        # add trailing slash to all lines except the last with content
+        if i < call.end_line - 1:
+            line += '\\'
+        elif last_assert_line.strip():
+            line += '\\'
+        else:
+            line = line.rstrip()
+        content_list[i] = line
+
+
+def remove_msg_param(call: Call, content_list: List[str]) -> None:
+    lines_to_check = range(call.line, call.end_line) or [call.line]
+    for line_no in lines_to_check:
+        line = content_list[line_no]
+        if 'msg' not in line:
+            continue
+
+        line = re.sub(r'msg\s*=\s*', '', line)
+        if line.endswith('\\'):
+            line = line[:-1]
+        line = line.rstrip()
+        if line.endswith(','):
+            line = line[:-1]
+        content_list[line_no] = line
 
 
 def rewrite_asserts(contents: str) -> str:
     tokens = src_to_tokens(contents)
-    asserts = get_asserts(contents, tokens)
+    calls = get_calls(contents, tokens)
     content_list = contents.splitlines()
-    for _assert in asserts:
-        offset = 0
-        assert_type = ASSERT_TYPES[_assert.name]
+    for call in calls:
+        assert_type = ASSERT_TYPES[call.name]
         ops_after = [
             tok for i, tok in enumerate(tokens)
-            if i > _assert.token_idx and tok.name == 'OP'
+            if i > call.token_idx and tok.name == 'OP'
         ]
 
-        # if one line, strip the outer parentheses
-        if _assert.line_length == 1:
-            open_paren = next(t for t in ops_after if t.src == '(')
-            closing_paren = find_closing_paren(open_paren, ops_after)
-
-            line = content_list[_assert.line]
-            line = remove_token(line, open_paren, offset=offset)
-            offset -= 1  # removing the open paren shifts all chars left
-            line = remove_token(line, closing_paren, offset=offset)
-            content_list[_assert.line] = line
+        rewrite_parens(ops_after, call, content_list)
+        remove_msg_param(call, content_list)
 
         # for equality comparators, turn the next comma into ' ==', etc
         if assert_type.type == 'binary':
@@ -137,18 +207,26 @@ def rewrite_asserts(contents: str) -> str:
             i = comma.line - 1
             line = content_list[i]
             line = remove_token(
-                line, comma, replace_with=operator, offset=offset, strip=strip,
+                line,
+                comma,
+                replace_with=operator,
+                offset=call.offset,
+                strip=strip,
             )
             content_list[i] = line
 
-        i = _assert.line
-        line = content_list[i]
-
+        line = content_list[call.line]
         prefix = assert_type.prefix
-        suffix = assert_type.suffix
+        line = line.replace(f'self.{call.name}', f'assert {prefix}')
+        content_list[call.line] = line
 
-        line = line.replace(f'self.{_assert.name}', f'assert {prefix}')
-        line += suffix
-        content_list[i] = line
+        # if the last line is blank, insert the suffix on the line before
+        if not content_list[call.end_line].strip():
+            call.end_line -= 1
+
+        suffix = assert_type.suffix
+        end_line = content_list[call.end_line]
+        end_line += suffix
+        content_list[call.end_line] = end_line
 
     return '\n'.join(content_list)

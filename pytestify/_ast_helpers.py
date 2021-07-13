@@ -1,12 +1,20 @@
 import ast
 import warnings
-from typing import Any, List
+from typing import Any, List, Optional
 
 
 def ast_parse(contents: str) -> ast.Module:
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
         return ast.parse(contents.encode())
+
+
+def is_valid_syntax(contents: str) -> bool:
+    try:
+        ast_parse(contents)
+    except SyntaxError:
+        return False
+    return True
 
 
 def elems_of_type(contents: str, elem_type: Any) -> List[Any]:
@@ -32,3 +40,11 @@ def elems_of_type(contents: str, elem_type: Any) -> List[Any]:
                 children = [children]
             queue |= set(children)
     return elems
+
+
+def imports_pytest_as(contents: str) -> Optional[str]:
+    for imp in elems_of_type(contents, ast.Import):
+        for alias in imp.names:
+            if alias.name == 'pytest':
+                return alias.asname or 'pytest'
+    return None

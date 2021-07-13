@@ -16,7 +16,7 @@ def is_test_class(base: Union[ast.Attribute, ast.Name]) -> bool:
         return base_id == 'unittest' and base.attr == 'TestCase'
     else:
         # looks like 'class MyClass(a):'
-        return base.id == 'TestCase'
+        return getattr(base, 'id', None) == 'TestCase'
 
 
 def get_test_classes(contents: str) -> List[TestClass]:
@@ -49,9 +49,14 @@ def remove_base_class(contents: str) -> str:
         # delete empty paren if they exist
         line = line.replace(f'{cls_name}():', f'{cls_name}:')
 
-        # prefix with "test" if not already
+        # prefix with "test" if not already. Strip out 'Tests' or 'Test'
+        # from the name if either is there
         if not test_cls.name.startswith('Test'):
-            cls_name = 'Test' + cls_name.replace('Test', '')
+            if 'Tests' in cls_name:
+                cls_name = cls_name.replace('Tests', '')
+            elif 'Test' in cls_name:
+                cls_name = cls_name.replace('Test', '')
+            cls_name = 'Test' + cls_name
             line = line.replace(test_cls.name, cls_name)
 
         content_list[i] = line

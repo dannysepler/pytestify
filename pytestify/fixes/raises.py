@@ -1,15 +1,7 @@
 import ast
-from typing import List, Optional
+from typing import List
 
-from pytestify._ast_helpers import elems_of_type
-
-
-def imports_pytest_as(contents: str) -> Optional[str]:
-    for imp in elems_of_type(contents, ast.Import):
-        for alias in imp.names:
-            if alias.name == 'pytest':
-                return alias.asname or 'pytest'
-    return None
+from pytestify._ast_helpers import elems_of_type, imports_pytest_as
 
 
 def get_raises(contents: str) -> List[int]:
