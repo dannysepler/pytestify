@@ -70,6 +70,20 @@ def test_rewrite_simple_asserts(before, after):
             '    assert 1 == 1',
         ),
         (
+            'try:\n'
+            '    pass\n'
+            'except:\n'
+            '    pass\n'
+            'finally:\n'
+            '    self.assertEqual(1, 1)',
+            'try:\n'
+            '    pass\n'
+            'except:\n'
+            '    pass\n'
+            'finally:\n'
+            '    assert 1 == 1',
+        ),
+        (
             'self.assertIsNone(\n'
             '    a\n'
             ')',

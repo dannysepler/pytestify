@@ -33,6 +33,7 @@ def elems_of_type(contents: str, elem_type: Any) -> List[Any]:
             'orelse',  # else statements
             'items',  # with statement
             'context_expr',  # context manager
+            'finalbody',  # finally in try / except
         ]
         for container in containers:
             children = getattr(elem, container, [])

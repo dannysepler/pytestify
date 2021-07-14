@@ -11,6 +11,8 @@ from pytestify.fixes.raises import rewrite_raises
             'with self.assertRaises(Exc) as e: pass',
             'with pytest.raises(Exc) as e: pass',
         ),
+        ('self.assertWarns(Exc)', 'pytest.warns(Exc)'),
+        ('with self.assertWarns(Exc): pass', 'with pytest.warns(Exc): pass'),
     ],
 )
 def test_rewrite_raises(before, after):
@@ -21,21 +23,30 @@ def test_rewrite_raises(before, after):
 @pytest.mark.parametrize(
     'before, after', [
         (
-            'self.assertRaises(Exc)',
+            'self.assertRaises(Exception)',
             'import pytest\n'
-            'pytest.raises(Exc)',
+            'pytest.raises(Exception)',
         ),
         (
             'import pytest\n'
-            'self.assertRaises(Exc)',
+            'self.assertRaises(Exception)',
             'import pytest\n'
-            'pytest.raises(Exc)',
+            'pytest.raises(Exception)',
         ),
         (
             'import pytest as pt\n'
-            'self.assertRaises(Exc)',
+            'self.assertRaises(Exception)',
             'import pytest as pt\n'
-            'pt.raises(Exc)',
+            'pt.raises(Exception)',
+        ),
+        (
+            'from __future__ import absolute_import\n'
+            '\n'
+            'self.assertRaises(Exception)',
+            'from __future__ import absolute_import\n'
+            '\n'
+            'import pytest\n'
+            'pytest.raises(Exception)',
         ),
     ],
 )
@@ -46,6 +57,7 @@ def test_adds_import_when_necessary(before, after):
 @pytest.mark.parametrize(
     'line', [
         '# self.assertRaises(SomeException):',
+        '# self.assertWarns(SomeException):',
     ],
 )
 def test_doesnt_rewrite_raises(line):

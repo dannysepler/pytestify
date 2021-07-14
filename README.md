@@ -19,7 +19,7 @@ TODO
 `pytestify path/to/folder/`
 
 Please read over all changes that pytestify makes. It's a new
-package, and there are bound to be issues with it.
+package, so there are bound to be issues.
 
 ## Implemented features
 
@@ -98,18 +98,8 @@ self.assertEqual(    # assert \
 ### Exceptions
 
 ```python
-# before
-self.assertRaises(Exception)
-with self.assertRaises(Exception):
-    ...
-with self.assertRaises(Exception) as e:
-    ...
-
-# after
-import pytest
-pytest.raises(Exception)
-with pytest.raises(Exception):
-    ...
-with pytest.raises(Exception) as e:
-    ...
+self.assertRaises(OSError)             # pytest.raises(OSError)
+self.assertWarns(OSError)              # pytest.warns(OSError)
+with self.assertRaises(OSError) as e:  # with pytest.raises(OSError) as e
+with self.assertWarns(OSError) as e:   # with pytest.warns(OSError) as e
 ```
