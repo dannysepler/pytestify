@@ -2,9 +2,12 @@ pytestify
 =========
 
 A tool to automatically change unittest to pytest. Similar to
-[unittest2pytest](https://github.com/pytest-dev/unittest2pytest), but with a few more features and written differently.
+[unittest2pytest](https://github.com/pytest-dev/unittest2pytest),
+but with a few more features and written using AST and tokenize, rather
+than lib2to3.
 
-Big thanks to [pyupgrade](https://github.com/asottile/pyupgrade/), which I'm modeling a lot of this project off of.
+Big thanks to [pyupgrade](https://github.com/asottile/pyupgrade/), which
+this is based off architecturally.
 
 ## Installation
 
@@ -12,15 +15,21 @@ TODO
 
 ## Usage
 
-`python pytestify path/to/file.py`\
-`python pytestify path/to/folder/`
+`pytestify path/to/file.py`\
+`pytestify path/to/folder/`
+
+Please read over all changes that pytestify makes. It's a new
+package, and there are bound to be issues with it.
 
 ## Implemented features
 
 ### Test class names
 
+Remove TestCase parent class, and make sure tests start with `Test`
+
 ```python
 class TestThing(unittest.TestCase):  # class TestThing:
+class TestThing(TestCase, ClassB):   # class TestThing(ClassB):
 class ThingTest(unittest.TestCase):  # class TestThing:
 class Thing(unittest.TestCase):      # class TestThing:
 ```
@@ -34,14 +43,16 @@ def tearDown(self):  # def teardown_method(self):
 
 ### Asserts
 
+Rewrite unittest assert methods using the `assert` keyword.
+
 ```python
-# unary asserts
+# asserting one thing
 self.assertTrue(a)       # assert a
 self.assertFalse (a)     # assert not a
 self.assertIsNone(a)     # assert a is None
 self.assertIsNotNone(a)  # assert a is not None
 
-# binary asserts
+# asserting two things
 self.assertEqual(a, b)      # assert a == b
 self.assertNotEqual(a, b)   # assert a != b
 self.assertIs(a, b)         # assert a is b
@@ -63,19 +74,23 @@ self.assertNotRegex(a, b)   # assert not a.search(b)
 self.assertTrue(a, msg='oh no!')  # assert a, 'oh no!'
 ```
 
+Note: `assertCountEqual` is NOT supported here. It is tricky to implement, and pytest has voiced
+[hesitations](https://github.com/pytest-dev/pytest/issues/5548) about including it in
+the near future. You can still use [unittest's implementation](https://stackoverflow.com/a/45946306).
+
 ### Multi-line asserts
 
-This is important because `assert (a == b, 'err')`  is equivalent to asserting a tuple, and thus is always `True`.
+Since `assert (a == b, 'err')`  is equivalent to asserting a tuple, and thus is always `True`.
 
 ```python
 self.assertEqual(    # assert \
     a,               #     a == \
-    b                #     b
+    b,               #     b
 )
 
 self.assertEqual(    # assert \
     a,               #     a == \
-    b                #     b, \
+    b,               #     b, \
     msg='oh no!'     #     'oh no!'
 )
 ```

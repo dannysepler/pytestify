@@ -184,6 +184,13 @@ def remove_msg_param(call: Call, content_list: List[str]) -> None:
         content_list[line_no] = line
 
 
+def remove_trailing_comma(call: Call, contents: List[str]) -> None:
+    last = call.end_line
+    penultimate = call.end_line - 1
+    if not contents[last].strip() and contents[penultimate].endswith(','):
+        contents[penultimate] = contents[penultimate][:-1]
+
+
 def rewrite_asserts(contents: str) -> str:
     tokens = src_to_tokens(contents)
     calls = get_calls(contents, tokens)
@@ -197,6 +204,7 @@ def rewrite_asserts(contents: str) -> str:
 
         rewrite_parens(ops_after, call, content_list)
         remove_msg_param(call, content_list)
+        remove_trailing_comma(call, content_list)
 
         # for equality comparators, turn the next comma into ' ==', etc
         if assert_type.type == 'binary':
