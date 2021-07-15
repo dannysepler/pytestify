@@ -7,15 +7,18 @@ but with a few more features and written using AST and tokenize, rather
 than lib2to3.
 
 Big thanks to [pyupgrade](https://github.com/asottile/pyupgrade/), which
-this is based off architecturally.
+this project has borrowed some formatting things from.
 
 ## Installation
 
-TODO
+`pip install pytestify`
 
 ## Usage
 
-`pytestify path/to/file.py`\
+`pytestify path/to/file.py`
+
+or
+
 `pytestify path/to/folder/`
 
 Please read over all changes that pytestify makes. It's a new
