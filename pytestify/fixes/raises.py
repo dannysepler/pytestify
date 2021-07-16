@@ -1,7 +1,7 @@
 import ast
 from typing import List
 
-from pytestify._ast_helpers import elems_of_type, imports_pytest_as
+from pytestify._ast_helpers import NodeVisitor, imports_pytest_as
 
 REWRITES = {
     'assertRaises': 'raises',
@@ -9,21 +9,18 @@ REWRITES = {
 }
 
 
-def get_calls(contents: str) -> List[int]:
-    locations = []
-    calls = elems_of_type(contents, ast.Call)
-    calls += [
-        expr.value for expr in elems_of_type(contents, ast.Expr)
-        if isinstance(expr.value, ast.Call)
-    ]
-    for call in calls:
-        if getattr(call.func, 'attr', None) in REWRITES.keys():
-            locations.append(call.lineno - 1)
-    return locations
+class Visitor(NodeVisitor):
+    def __init__(self) -> None:
+        self.calls: List[int] = []
+
+    def visit_Call(self, node: ast.Call) -> None:
+        if getattr(node.func, 'attr', None) in REWRITES:
+            self.calls.append(node.lineno - 1)
 
 
 def rewrite_raises(contents: str) -> str:
-    calls = get_calls(contents)
+    visitor = Visitor().visit_text(contents)
+    calls = visitor.calls
     content_list = contents.splitlines()
     pytest_as = imports_pytest_as(contents)
     if calls and not pytest_as:

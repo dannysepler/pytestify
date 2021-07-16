@@ -4,7 +4,7 @@ from typing import List, NamedTuple
 
 from tokenize_rt import Token, src_to_tokens
 
-from pytestify._ast_helpers import elems_of_type
+from pytestify._ast_helpers import NodeVisitor
 from pytestify._token_helpers import (
     find_closing_paren, find_outer_comma, remove_token,
 )
@@ -92,36 +92,30 @@ class Call:
         return (self.end_line - self.line) + 1
 
 
-def get_calls(contents: str, tokens: List[Token]) -> List[Call]:
-    calls = []
-    for expr in elems_of_type(contents, ast.Expr):
-        call = expr.value
-        if not isinstance(call, ast.Call):
-            continue
+class Visitor(NodeVisitor):
+    def __init__(self, tokens: List[Token]):
+        self.calls: List[Call] = []
+        self.tokens = tokens
+
+    def visit_Call(self, call: ast.Call) -> None:
         method = getattr(call.func, 'attr', None)
-        if not method:
-            # this occurs when the method is not called from 'self' --
-            # we should skip these occurrences
-            continue
-        if method not in ASSERT_TYPES:
-            continue
+        if not method or method not in ASSERT_TYPES:
+            return
 
         line = call.lineno
         call_idx = next(
-            line_no for line_no, tok in enumerate(tokens)
+            line_no for line_no, tok in enumerate(self.tokens)
             if tok.src == method and tok.line == line
         )
 
         operators = [
-            t for i, t in enumerate(
-                tokens,
-            ) if i >= call_idx and t.name == 'OP'
+            t for i, t in enumerate(self.tokens)
+            if i >= call_idx and t.name == 'OP'
         ]
         open_paren = next(t for t in operators if t.src == '(')
         close_paren = find_closing_paren(open_paren, operators)
         end_line = close_paren.line
-        calls.append(Call(method, line - 1, call_idx, end_line - 1))
-    return calls
+        self.calls.append(Call(method, line - 1, call_idx, end_line - 1))
 
 
 def rewrite_parens(
@@ -193,9 +187,9 @@ def remove_trailing_comma(call: Call, contents: List[str]) -> None:
 
 def rewrite_asserts(contents: str) -> str:
     tokens = src_to_tokens(contents)
-    calls = get_calls(contents, tokens)
+    visitor = Visitor(tokens).visit_text(contents)
     content_list = contents.splitlines()
-    for call in calls:
+    for call in visitor.calls:
         assert_type = ASSERT_TYPES[call.name]
         ops_after = [
             tok for i, tok in enumerate(tokens)

@@ -1,15 +1,11 @@
+from _ast import expr  # isort: skip
 import ast
-from typing import List, NamedTuple, Union
+from typing import Dict
 
-from pytestify._ast_helpers import elems_of_type
-
-
-class TestClass(NamedTuple):
-    name: str
-    line: int
+from pytestify._ast_helpers import NodeVisitor
 
 
-def is_test_class(base: Union[ast.Attribute, ast.Name]) -> bool:
+def is_test_class(base: expr) -> bool:
     if isinstance(base, ast.Attribute):
         # looks like 'class MyClass(a.b):'
         base_id = getattr(base.value, 'id', None)
@@ -19,17 +15,18 @@ def is_test_class(base: Union[ast.Attribute, ast.Name]) -> bool:
         return getattr(base, 'id', None) == 'TestCase'
 
 
-def get_test_classes(contents: str) -> List[TestClass]:
-    test_classes = []
-    for elem in elems_of_type(contents, ast.ClassDef):
-        if any(is_test_class(base) for base in elem.bases):
-            line = elem.lineno - 1
-            test_classes.append(TestClass(elem.name, line))
-    return test_classes
+class Visitor(NodeVisitor):
+    def __init__(self) -> None:
+        self.test_classes: Dict[int, str] = {}
+
+    def visit_ClassDef(self, node: ast.ClassDef) -> None:
+        if any(is_test_class(base) for base in node.bases):
+            line = node.lineno - 1
+            self.test_classes[line] = node.name
 
 
 def remove_base_class(contents: str) -> str:
-    test_classes = get_test_classes(contents)
+    visitor = Visitor().visit_text(contents)
     content_list = contents.splitlines()
 
     # todo: detect if unittest has been aliased as something else
@@ -39,25 +36,24 @@ def remove_base_class(contents: str) -> str:
         'TestCase, ',
         'TestCase',
     ]
-    for test_cls in test_classes:
-        cls_name = test_cls.name
-        i = test_cls.line
+    for i, orig_name in visitor.test_classes.items():
         line = content_list[i]
         for variation in variations:
             line = line.replace(variation, '')
 
         # delete empty paren if they exist
-        line = line.replace(f'{cls_name}():', f'{cls_name}:')
+        line = line.replace(f'{orig_name}():', f'{orig_name}:')
 
         # prefix with "test" if not already. Strip out 'Tests' or 'Test'
         # from the name if either is there
-        if not test_cls.name.startswith('Test'):
+        if not orig_name.startswith('Test'):
+            cls_name = orig_name
             if 'Tests' in cls_name:
                 cls_name = cls_name.replace('Tests', '')
             elif 'Test' in cls_name:
                 cls_name = cls_name.replace('Test', '')
             cls_name = 'Test' + cls_name
-            line = line.replace(test_cls.name, cls_name)
+            line = line.replace(orig_name, cls_name)
 
         content_list[i] = line
 

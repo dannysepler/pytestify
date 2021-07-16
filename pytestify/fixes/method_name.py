@@ -1,7 +1,7 @@
 import ast
-from typing import List, NamedTuple
+from typing import Dict
 
-from pytestify._ast_helpers import elems_of_type
+from pytestify._ast_helpers import NodeVisitor
 
 REWRITES = {
     'setUp': 'setup_method',
@@ -9,26 +9,21 @@ REWRITES = {
 }
 
 
-class Method(NamedTuple):
-    name: str
-    line: int
+class Visitor(NodeVisitor):
+    def __init__(self) -> None:
+        self.methods: Dict[int, str] = {}
 
-
-def get_selected_methods(contents: str) -> List[Method]:
-    methods = []
-    for method in elems_of_type(contents, ast.FunctionDef):
-        if method.name in REWRITES.keys():
-            line = method.lineno - 1
-            methods.append(Method(method.name, line))
-    return methods
+    def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
+        if node.name in REWRITES:
+            self.methods[node.lineno - 1] = node.name
 
 
 def rewrite_method_name(contents: str) -> str:
-    methods = get_selected_methods(contents)
+    visitor = Visitor().visit_text(contents)
     content_list = contents.splitlines()
-    for m in methods:
-        line = content_list[m.line]
-        line = line.replace(m.name, REWRITES[m.name])
-        content_list[m.line] = line
+    for line_no, method in visitor.methods.items():
+        line = content_list[line_no]
+        line = line.replace(method, REWRITES[method])
+        content_list[line_no] = line
 
     return '\n'.join(content_list)
