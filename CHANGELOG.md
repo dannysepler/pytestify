@@ -4,11 +4,13 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+## 1.0.1 - July 17th 2021
+
 - Skipping
 - Expected failures
 - setupClass / teardownClass
 
-## 1.0.0 - July 15th 2021
+## 1.0.0 - July 14th 2021
 
 - Test class name
 - setUp / TearDown
