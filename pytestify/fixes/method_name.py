@@ -4,6 +4,8 @@ from typing import Dict
 from pytestify._ast_helpers import NodeVisitor
 
 REWRITES = {
+    'setUpClass': 'setup_class',
+    'tearDownClass': 'teardown_class',
     'setUp': 'setup_method',
     'tearDown': 'teardown_method',
 }

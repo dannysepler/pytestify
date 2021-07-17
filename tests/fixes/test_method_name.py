@@ -5,6 +5,8 @@ from pytestify.fixes.method_name import rewrite_method_name
 
 @pytest.mark.parametrize(
     'before, after', [
+        ('def setUpClass(self): pass', 'def setup_class(self): pass'),
+        ('def tearDownClass(self): pass', 'def teardown_class(self): pass'),
         ('def setUp(self): pass', 'def setup_method(self): pass'),
         ('def tearDown(self): pass', 'def teardown_method(self): pass'),
     ],

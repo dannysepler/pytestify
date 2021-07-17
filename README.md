@@ -40,8 +40,10 @@ class Thing(unittest.TestCase):      # class TestThing:
 ### Setup / teardowns
 
 ```python
-def setUp(self):     # def setup_method(self):
-def tearDown(self):  # def teardown_method(self):
+def setUp(self):          # def setup_method(self):
+def tearDown(self):       # def teardown_method(self):
+def setUpClass(self):     # def setup_class(self):
+def tearDownClass(self):  # def teardown_class(self):
 ```
 
 ### Asserts
@@ -107,10 +109,17 @@ with self.assertRaises(OSError) as e:  # with pytest.raises(OSError) as e
 with self.assertWarns(OSError) as e:   # with pytest.warns(OSError) as e
 ```
 
-### Skipping
+### Skipping / Expecting failure
 
 ```python
-@unittest.skip('some reason')    # @pytest.skip('some reason')
+# decorated
+@unittest.skip('some reason')    # @pytest.mark.skip('some reason')
 @unittest.skipIf(some_bool)      # @pytest.mark.skipif(some_bool)
 @unittest.skipUnless(some_bool)  # @pytest.mark.skipif(not some_bool)
+@unittest.expectedFailure        # @pytest.mark.xfail
+
+# not decorated
+unittest.skip('some reason')     # pytest.skip('some reason')
+unittest.skipTest('some reason') # pytest.skip('some reason')
+unittest.fail('some reason')     # pytest.fail('some reason')
 ```

@@ -5,10 +5,12 @@ All notable changes to this project will be documented in this file. This projec
 ## [Unreleased]
 
 - Skipping
+- Expected failures
+- setupClass / teardownClass
 
 ## 1.0.0 - July 15th 2021
 
 - Test class name
-- Setup / Teardown
+- setUp / TearDown
 - Simple asserts
 - Multi-line asserts
