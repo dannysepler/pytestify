@@ -106,3 +106,11 @@ self.assertWarns(OSError)              # pytest.warns(OSError)
 with self.assertRaises(OSError) as e:  # with pytest.raises(OSError) as e
 with self.assertWarns(OSError) as e:   # with pytest.warns(OSError) as e
 ```
+
+### Skipping
+
+```python
+@unittest.skip('some reason')    # @pytest.skip('some reason')
+@unittest.skipIf(some_bool)      # @pytest.mark.skipif(some_bool)
+@unittest.skipUnless(some_bool)  # @pytest.mark.skipif(not some_bool)
+```

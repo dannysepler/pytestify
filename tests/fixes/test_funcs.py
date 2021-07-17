@@ -1,6 +1,6 @@
 import pytest
 
-from pytestify.fixes.raises import rewrite_raises
+from pytestify.fixes.funcs import rewrite_pytest_funcs
 
 
 @pytest.mark.parametrize(
@@ -13,11 +13,29 @@ from pytestify.fixes.raises import rewrite_raises
         ),
         ('self.assertWarns(Exc)', 'pytest.warns(Exc)'),
         ('with self.assertWarns(Exc): pass', 'with pytest.warns(Exc): pass'),
+        (
+            '@unittest.skip("some reason")\n'
+            'def blah(): pass',
+            '@pytest.skip("some reason")\n'
+            'def blah(): pass',
+        ),
+        (
+            '@unittest.skipIf(some_bool)\n'
+            'def blah(): pass',
+            '@pytest.mark.skipif(some_bool)\n'
+            'def blah(): pass',
+        ),
+        (
+            '@unittest.skipUnless(some_bool)\n'
+            'def blah(): pass',
+            '@pytest.mark.skipif(not some_bool)\n'
+            'def blah(): pass',
+        ),
     ],
 )
-def test_rewrite_raises(before, after):
+def test_rewrite_pytest_funcs(before, after):
     imports = 'import pytest\n'
-    assert rewrite_raises(imports + before) == imports + after
+    assert rewrite_pytest_funcs(imports + before) == imports + after
 
 
 @pytest.mark.parametrize(
@@ -51,7 +69,7 @@ def test_rewrite_raises(before, after):
     ],
 )
 def test_adds_import_when_necessary(before, after):
-    assert rewrite_raises(before) == after
+    assert rewrite_pytest_funcs(before) == after
 
 
 @pytest.mark.parametrize(
@@ -60,5 +78,5 @@ def test_adds_import_when_necessary(before, after):
         '# self.assertWarns(SomeException):',
     ],
 )
-def test_doesnt_rewrite_raises(line):
-    assert rewrite_raises(line) == line
+def test_doesnt_rewrite_pytest_funcs(line):
+    assert rewrite_pytest_funcs(line) == line

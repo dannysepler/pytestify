@@ -6,8 +6,8 @@ from typing import Optional, Sequence, Union
 from pytestify._ast_helpers import is_valid_syntax
 from pytestify.fixes.asserts import rewrite_asserts
 from pytestify.fixes.base_class import remove_base_class
+from pytestify.fixes.funcs import rewrite_pytest_funcs
 from pytestify.fixes.method_name import rewrite_method_name
-from pytestify.fixes.raises import rewrite_raises
 
 
 class RuntimeNotes:
@@ -39,7 +39,7 @@ def _fix_path(
         contents = remove_base_class(orig_contents)
         contents = rewrite_method_name(contents)
         contents = rewrite_asserts(contents)
-        contents = rewrite_raises(contents)
+        contents = rewrite_pytest_funcs(contents)
     except SyntaxError:
         reason = 'due to the source file having invalid syntax'
         if is_valid:
