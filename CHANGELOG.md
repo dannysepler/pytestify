@@ -4,12 +4,15 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+## 1.0.2 - July 22nd 2021
+
+- pytest.approx
+
 ## 1.0.1 - July 17th 2021
 
 - Skipping
 - Expected failures
 - setupClass / teardownClass
-- pytest.approx
 
 ## 1.0.0 - July 14th 2021
 
