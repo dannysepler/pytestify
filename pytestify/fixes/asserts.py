@@ -61,7 +61,7 @@ ASSERT_TYPES = {
         op=',',
         suffix=')',
     ),
-    'assertAlmostEquals': _Assert(
+    'assertAlmostEqual': _Assert(
         'binary',
         op=' == pytest.approx(',
         suffix=')',
@@ -71,6 +71,7 @@ ASSERT_TYPES = {
 
 ALIASES = {
     # deprecated name -> current name
+    'assertAlmostEquals': 'assertAlmostEqual',
     'assertEquals': 'assertEqual',
     'assertNotEquals': 'assertNotEqual',
 }

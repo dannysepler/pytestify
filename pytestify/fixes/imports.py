@@ -8,7 +8,6 @@ class Visitor(NodeVisitor):
         self.uses_pytest_func: bool = False
 
     def visit_Call(self, node: ast.Call) -> None:
-        print(ast.dump(node))
         val = getattr(node.func, 'value', None)
         if val and val.id == 'pytest':
             self.uses_pytest_func = True
