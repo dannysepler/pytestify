@@ -24,3 +24,18 @@ def test_adds_pytest_import(line):
 )
 def test_doesnt_add_pytest_import(line):
     assert add_pytest_import(line) == line
+
+
+def test_adds_import_below_future():
+    before = (
+        'from __future__ import absolute_import\n'
+        '\n'
+        'pytest.raises(SomeError)'
+    )
+    after = (
+        'from __future__ import absolute_import\n'
+        'import pytest\n'
+        '\n'
+        'pytest.raises(SomeError)'
+    )
+    assert add_pytest_import(before) == after

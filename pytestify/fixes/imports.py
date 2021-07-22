@@ -24,7 +24,7 @@ def add_pytest_import(contents: str) -> str:
         content_list = contents.splitlines()
         non_future_line = next(
             i for i, line in enumerate(content_list)
-            if line.strip() and not line.startswith('from __future__')
+            if not line.startswith('from __future__')
         )
         content_list.insert(non_future_line, 'import pytest')
         return '\n'.join(content_list)

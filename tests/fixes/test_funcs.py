@@ -42,35 +42,6 @@ from pytestify.fixes.funcs import rewrite_pytest_funcs
     ],
 )
 def test_rewrite_pytest_funcs(before, after):
-    imports = 'import pytest\n'
-    assert rewrite_pytest_funcs(imports + before) == imports + after
-
-
-@pytest.mark.parametrize(
-    'before, after', [
-        (
-            'self.assertRaises(Exception)',
-            'import pytest\n'
-            'pytest.raises(Exception)',
-        ),
-        (
-            'import pytest\n'
-            'self.assertRaises(Exception)',
-            'import pytest\n'
-            'pytest.raises(Exception)',
-        ),
-        (
-            'from __future__ import absolute_import\n'
-            '\n'
-            'self.assertRaises(Exception)',
-            'from __future__ import absolute_import\n'
-            '\n'
-            'import pytest\n'
-            'pytest.raises(Exception)',
-        ),
-    ],
-)
-def test_adds_import_when_necessary(before, after):
     assert rewrite_pytest_funcs(before) == after
 
 

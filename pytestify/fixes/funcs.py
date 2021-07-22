@@ -2,7 +2,7 @@ import ast
 import re
 from typing import NamedTuple, Optional, Set
 
-from pytestify._ast_helpers import NodeVisitor, imports_pytest
+from pytestify._ast_helpers import NodeVisitor
 
 
 class Func(NamedTuple):
@@ -59,15 +59,6 @@ def rewrite_pytest_funcs(contents: str) -> str:
     visitor = Visitor().visit_text(contents)
     calls = visitor.calls
     content_list = contents.splitlines()
-    imports = imports_pytest(contents)
-    if calls and not imports:
-        non_future_line = next(
-            i for i, line in enumerate(content_list)
-            if line.strip() and not line.startswith('from __future__')
-        )
-        content_list.insert(non_future_line, 'import pytest')
-        calls = {c + 1 for c in calls}
-
     for line_no in sorted(calls):
         if line_no < 0:
             continue
