@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file. This projec
 - Skipping
 - Expected failures
 - setupClass / teardownClass
+- pytest.approx
 
 ## 1.0.0 - July 14th 2021
 

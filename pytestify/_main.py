@@ -7,6 +7,7 @@ from pytestify._ast_helpers import is_valid_syntax
 from pytestify.fixes.asserts import rewrite_asserts
 from pytestify.fixes.base_class import remove_base_class
 from pytestify.fixes.funcs import rewrite_pytest_funcs
+from pytestify.fixes.imports import add_pytest_import
 from pytestify.fixes.method_name import rewrite_method_name
 
 
@@ -40,6 +41,11 @@ def _fix_path(
         contents = rewrite_method_name(contents)
         contents = rewrite_asserts(contents)
         contents = rewrite_pytest_funcs(contents)
+        contents = add_pytest_import(contents)
+
+        if not contents.endswith('\n'):
+            contents += '\n'
+
     except SyntaxError:
         reason = 'due to the source file having invalid syntax'
         if is_valid:

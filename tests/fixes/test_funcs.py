@@ -60,12 +60,6 @@ def test_rewrite_pytest_funcs(before, after):
             'pytest.raises(Exception)',
         ),
         (
-            'import pytest as pt\n'
-            'self.assertRaises(Exception)',
-            'import pytest as pt\n'
-            'pt.raises(Exception)',
-        ),
-        (
             'from __future__ import absolute_import\n'
             '\n'
             'self.assertRaises(Exception)',

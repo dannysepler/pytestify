@@ -2,7 +2,7 @@ import ast
 import re
 from typing import NamedTuple, Optional, Set
 
-from pytestify._ast_helpers import NodeVisitor, imports_pytest_as
+from pytestify._ast_helpers import NodeVisitor, imports_pytest
 
 
 class Func(NamedTuple):
@@ -59,8 +59,8 @@ def rewrite_pytest_funcs(contents: str) -> str:
     visitor = Visitor().visit_text(contents)
     calls = visitor.calls
     content_list = contents.splitlines()
-    pytest_as = imports_pytest_as(contents)
-    if calls and not pytest_as:
+    imports = imports_pytest(contents)
+    if calls and not imports:
         non_future_line = next(
             i for i, line in enumerate(content_list)
             if line.strip() and not line.startswith('from __future__')
@@ -68,7 +68,6 @@ def rewrite_pytest_funcs(contents: str) -> str:
         content_list.insert(non_future_line, 'import pytest')
         calls = {c + 1 for c in calls}
 
-    pytest_as = pytest_as or 'pytest'
     for line_no in sorted(calls):
         if line_no < 0:
             continue
@@ -80,8 +79,8 @@ def rewrite_pytest_funcs(contents: str) -> str:
             decorated = line.lstrip().startswith('@')
             replace = func.decorator if decorated else func.pytest
 
-            line = line.replace(f'self.{orig}', f'{pytest_as}.{replace}')
-            line = line.replace(f'unittest.{orig}', f'{pytest_as}.{replace}')
+            line = line.replace(f'self.{orig}', f'pytest.{replace}')
+            line = line.replace(f'unittest.{orig}', f'pytest.{replace}')
 
         content_list[line_no] = line
 

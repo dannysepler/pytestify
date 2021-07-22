@@ -75,6 +75,11 @@ self.assertLessEqual(a, b)  # assert a <= b
 self.assertRegex(a, b)      # assert a.search(b)
 self.assertNotRegex(a, b)   # assert not a.search(b)
 
+self.assertAlmostEquals(a, b)
+#   assert a == pytest.approx(b)
+self.assertAlmostEquals(a, b, places=2)
+#   assert a == pytest.approx(b, rel=0.01)
+
 # error messages
 self.assertTrue(a, msg='oh no!')  # assert a, 'oh no!'
 ```

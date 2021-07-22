@@ -1,6 +1,6 @@
 import ast
 import warnings
-from typing import Any, Optional
+from typing import Any
 
 
 def ast_parse(contents: str) -> ast.Module:
@@ -26,14 +26,14 @@ class NodeVisitor(ast.NodeVisitor):
 class FindImportName(NodeVisitor):
     def __init__(self, search: str):
         self.search = search
-        self.result = ''
+        self.imports = False
 
     def visit_Import(self, node: ast.Import) -> None:
         for alias in node.names:
             if alias.name == self.search:
-                self.result = alias.asname or self.search
+                self.imports = True
 
 
-def imports_pytest_as(contents: str) -> Optional[str]:
+def imports_pytest(contents: str) -> bool:
     visitor = FindImportName('pytest').visit_text(contents)
-    return visitor.result or None
+    return visitor.imports

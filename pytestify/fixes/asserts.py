@@ -1,6 +1,6 @@
 import ast
 import re
-from typing import List, NamedTuple
+from typing import List, NamedTuple, Optional
 
 from tokenize_rt import Token, src_to_tokens
 
@@ -61,6 +61,12 @@ ASSERT_TYPES = {
         op=',',
         suffix=')',
     ),
+    'assertAlmostEquals': _Assert(
+        'binary',
+        op=' == pytest.approx(',
+        suffix=')',
+        strip=True,
+    ),
 }
 
 ALIASES = {
@@ -80,16 +86,25 @@ class Call:
         line: int,
         token_idx: int,
         end_line: int,
+        places: Optional[int] = None,
     ):
         self.name = name
         self.line = line
         self.token_idx = token_idx
         self.end_line = end_line
         self.offset = 0
+        self.places = places
 
     @property
     def line_length(self) -> int:
         return (self.end_line - self.line) + 1
+
+    @property
+    def rel(self) -> Optional[int]:
+        ''' useful for pytest.approx '''
+        if self.places is None:
+            return None
+        return 10 ** (self.places * -1)
 
 
 class Visitor(NodeVisitor):
@@ -104,7 +119,7 @@ class Visitor(NodeVisitor):
 
         line = call.lineno
         call_idx = next(
-            line_no for line_no, tok in enumerate(self.tokens)
+            tok_no for tok_no, tok in enumerate(self.tokens)
             if tok.src == method and tok.line == line
         )
 
@@ -114,8 +129,15 @@ class Visitor(NodeVisitor):
         ]
         open_paren = next(t for t in operators if t.src == '(')
         close_paren = find_closing_paren(open_paren, operators)
+        kwargs = {}
+        for keyword in call.keywords or []:
+            if keyword.arg == 'places':
+                const = keyword.value
+                kwargs['places'] = getattr(const, 'value', None)
         end_line = close_paren.line
-        self.calls.append(Call(method, line - 1, call_idx, end_line - 1))
+        self.calls.append(
+            Call(method, line - 1, call_idx, end_line - 1, **kwargs),
+        )
 
 
 def rewrite_parens(
@@ -221,6 +243,14 @@ def rewrite_asserts(contents: str) -> str:
         prefix = assert_type.prefix
         line = line.replace(f'self.{call.name}', f'assert {prefix}')
         content_list[call.line] = line
+        if call.places:
+            for i in range(call.line, call.end_line + 1):
+                if 'places' in content_list[i]:
+                    line = content_list[i]
+                    line = line.replace(
+                        f'places={call.places}', f'rel={call.rel}',
+                    )
+                    content_list[i] = line
 
         # if the last line is blank, insert the suffix on the line before
         if not content_list[call.end_line].strip():
