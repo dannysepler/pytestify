@@ -58,7 +58,7 @@ def _fix_path(
 
     changes_made = bool(_no_ws(contents) != _no_ws(orig_contents))
     if changes_made:
-        print(f'Fixing {path.resolve()}')
+        print(f'Fixing {path}')
         path.write_text(contents)
     return int(changes_made)
 

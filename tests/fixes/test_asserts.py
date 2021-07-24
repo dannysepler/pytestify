@@ -32,7 +32,7 @@ from pytestify.fixes.asserts import rewrite_asserts
         ('self.assertAlmostEquals(a, b)', 'assert a == pytest.approx(b)'),
         (
             'self.assertAlmostEquals(a, b, places=2)',
-            'assert a == pytest.approx(b, rel=0.01)',
+            'assert a == pytest.approx(b, abs=0.01)',
         ),
     ],
 )
@@ -173,7 +173,7 @@ def test_rewrite_complex_asserts(before, after):
             'assert \\\n'
             '   a == pytest.approx(\\\n'
             '   b, \\\n'
-            '   rel=0.01)\n'
+            '   abs=0.01)\n'
             '',
         ),
     ],

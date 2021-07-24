@@ -20,22 +20,36 @@ def test_adds_pytest_import(line):
     'line', [
         'unrelated_func()',
         'pytest(SomeError)',
+        'a.b.c.d(SomeError)',
     ],
 )
 def test_doesnt_add_pytest_import(line):
     assert add_pytest_import(line) == line
 
 
-def test_adds_import_below_future():
-    before = (
-        'from __future__ import absolute_import\n'
-        '\n'
-        'pytest.raises(SomeError)'
-    )
-    after = (
-        'from __future__ import absolute_import\n'
-        'import pytest\n'
-        '\n'
-        'pytest.raises(SomeError)'
-    )
+@pytest.mark.parametrize(
+    'before, after', [
+        (
+            'from __future__ import absolute_import\n'
+            '\n'
+            'pytest.raises(SomeError)',
+            'from __future__ import absolute_import\n'
+            'import pytest\n'
+            '\n'
+            'pytest.raises(SomeError)',
+        ),
+        (
+            '""" Some docstring\nblah\nend of docstring"""\n'
+            '\n'
+            'import abc\n'
+            'pytest.blah()',
+            '""" Some docstring\nblah\nend of docstring"""\n'
+            '\n'
+            'import pytest\n'
+            'import abc\n'
+            'pytest.blah()',
+        ),
+    ],
+)
+def test_adds_import_in_a_reasonable_place(before, after):
     assert add_pytest_import(before) == after

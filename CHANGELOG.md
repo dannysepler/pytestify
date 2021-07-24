@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+- `import pytest` is next to other imports
+
 ## 1.0.3 - July 22nd 2021
 
 - pytest.approx

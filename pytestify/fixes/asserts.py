@@ -133,6 +133,7 @@ class Visitor(NodeVisitor):
         kwargs = {}
         for keyword in call.keywords or []:
             if keyword.arg == 'places':
+                # assertAlmostEqual / assertAlmostEquals
                 const = keyword.value
                 kwargs['places'] = getattr(const, 'value', None)
         end_line = close_paren.line
@@ -249,7 +250,7 @@ def rewrite_asserts(contents: str) -> str:
                 if 'places' in content_list[i]:
                     line = content_list[i]
                     line = line.replace(
-                        f'places={call.places}', f'rel={call.rel}',
+                        f'places={call.places}', f'abs={call.rel}',
                     )
                     content_list[i] = line
 
