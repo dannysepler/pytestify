@@ -7,7 +7,7 @@ but with a few more features and written using AST and tokenize, rather
 than lib2to3.
 
 Big thanks to [pyupgrade](https://github.com/asottile/pyupgrade/), which
-this project has borrowed some formatting things from.
+this project has learned from.
 
 ## Installation
 
