@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file. This projec
 ## [Unreleased]
 
 - `import pytest` is next to other imports
+- Rewrite multiline asserts with fewer slashes
 
 ## 1.0.3 - July 22nd 2021
 

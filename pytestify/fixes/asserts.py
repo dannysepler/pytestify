@@ -168,9 +168,14 @@ def rewrite_parens(
     )
     content_list[call.end_line] = end_line
 
+
+def add_slashes(call: Call, content_list: List[str]) -> None:
     last_assert_line = content_list[call.end_line]
     for i in range(call.line, call.end_line):
         line = content_list[i]
+
+        if line.endswith(('{', '[', '(', ',')):
+            continue
 
         # skip the assertion line as it will add its own space
         if i > call.line:
@@ -261,6 +266,9 @@ def rewrite_asserts(contents: str) -> str:
         suffix = assert_type.suffix
         end_line = content_list[call.end_line]
         end_line += suffix
+
+        add_slashes(call, content_list)
+
         content_list[call.end_line] = end_line
 
     return '\n'.join(content_list)

@@ -100,7 +100,7 @@ self.assertEqual(    # assert \
 
 self.assertEqual(    # assert \
     a,               #     a == \
-    b,               #     b, \
+    b,               #     b,
     msg='oh no!'     #     'oh no!'
 )
 ```

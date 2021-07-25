@@ -106,9 +106,9 @@ def test_rewrite_simple_asserts(before, after):
             ')',
             'assert \\\n'
             '    a == \\\n'
-            '    [ \\\n'
-            '        1, \\\n'
-            '        2, \\\n'
+            '    [\n'
+            '        1,\n'
+            '        2,\n'
             '    ]\n'
             '',
         ),
@@ -150,7 +150,7 @@ def test_rewrite_complex_asserts(before, after):
             ')',
             'assert \\\n'
             '   a == \\\n'
-            '   b, \\\n'
+            '   b,\n'
             "   'Error'\n"
             '',
         ),
@@ -171,8 +171,8 @@ def test_rewrite_complex_asserts(before, after):
             '   places=2\n'
             ')',
             'assert \\\n'
-            '   a == pytest.approx(\\\n'
-            '   b, \\\n'
+            '   a == pytest.approx(\n'
+            '   b,\n'
             '   abs=0.01)\n'
             '',
         ),
