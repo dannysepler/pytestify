@@ -146,6 +146,7 @@ def rewrite_parens(
     operators: List[Token],
     call: Call,
     content_list: List[str],
+    comma: Optional[Token],
 ) -> None:
     '''
     For single line asserts, remove parantheses
@@ -158,13 +159,14 @@ def rewrite_parens(
     start_line = remove_token(start_line, open_paren, offset=call.offset)
     content_list[call.line] = start_line
 
-    if call.line_length == 1:
+    if call.line_length == 1 or comma and comma.line == open_paren.line:
         call.offset -= 1  # removing the open paren shifts all chars left
 
     end_line = content_list[call.end_line]
+    offset = call.offset if call.line_length == 1 else 0
     end_line = remove_token(
         end_line, closing_paren,
-        offset=call.offset, strip=True,
+        offset=offset, strip=True,
     )
     content_list[call.end_line] = end_line
 
@@ -225,7 +227,8 @@ def rewrite_asserts(contents: str) -> str:
             if i > call.token_idx and tok.name == 'OP'
         ]
 
-        rewrite_parens(ops_after, call, content_list)
+        comma = find_outer_comma(ops_after)
+        rewrite_parens(ops_after, call, content_list, comma)
         remove_msg_param(call, content_list)
         remove_trailing_comma(call, content_list)
 
@@ -234,7 +237,9 @@ def rewrite_asserts(contents: str) -> str:
             operator = assert_type.op
             strip = assert_type.strip
 
-            comma = find_outer_comma(ops_after)
+            if comma is None:
+                raise ValueError('A comma is expected in binary asserts')
+
             i = comma.line - 1
             line = content_list[i]
             line = remove_token(

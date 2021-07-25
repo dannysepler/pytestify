@@ -15,6 +15,7 @@ from pytestify.fixes.asserts import rewrite_asserts
         ('self.assertEquals(1, 1)', 'assert 1 == 1'),
         ('self.assertEqual(1, 1)', 'assert 1 == 1'),
         ('self.assertNotEqual(1, 2)', 'assert 1 != 2'),
+        ('self.assertDictEqual(a, b)', 'assert a == b'),
         ('self.assertListEqual(a, b)', 'assert a == b'),
         ('self.assertSetEqual(a, b)', 'assert a == b'),
         ('self.assertItemsEqual(a, b)', 'assert sorted(a) == sorted(b)'),
@@ -121,6 +122,14 @@ def test_rewrite_simple_asserts(before, after):
             '    a == \\\n'
             '    b\n'
             '',
+        ),
+        (
+            'self.assertDictEqual(a, {\n'
+            "    'a': 1,\n"
+            '})',
+            'assert a == {\n'
+            "    'a': 1,\n"
+            '}',
         ),
     ],
 )
