@@ -194,11 +194,9 @@ def add_slashes(call: Call, content_list: List[str]) -> None:
 
         if line.endswith(('{', '[', '(', ',')):
             continue
-
         tokens = src_to_tokens(line)
         comments = [t for t in tokens if t.name == 'COMMENT']
 
-        print(comments)
         # add trailing slash to all lines except the last with content
         if i < call.end_line - 1 or last_assert_line.strip():
             if comments:
