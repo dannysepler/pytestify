@@ -147,7 +147,7 @@ def rewrite_parens(
     call: Call,
     content_list: List[str],
     comma: Optional[Token],
-) -> None:
+) -> bool:
     '''
     For single line asserts, remove parantheses
     For multi-line asserts, convert parantheses to slashes
@@ -168,7 +168,24 @@ def rewrite_parens(
         end_line, closing_paren,
         offset=offset, strip=True,
     )
-    content_list[call.end_line] = end_line
+    if not end_line.strip():
+        content_list.pop(call.end_line)
+        call.end_line -= 1
+        return True
+    else:
+        content_list[call.end_line] = end_line
+        return False
+
+
+def combine_assert(call: Call, content_list: List[str]) -> bool:
+    if call.line == call.end_line:
+        return False
+    if content_list[call.line].strip() == 'assert':
+        second_line = content_list.pop(call.line + 1)
+        content_list[call.line] += second_line.lstrip()
+        call.end_line -= 1
+        return True
+    return False
 
 
 def add_slashes(call: Call, content_list: List[str]) -> None:
@@ -179,22 +196,18 @@ def add_slashes(call: Call, content_list: List[str]) -> None:
         if line.endswith(('{', '[', '(', ',')):
             continue
 
-        # skip the assertion line as it will add its own space
-        if i > call.line:
-            line += ' '
-
         # add trailing slash to all lines except the last with content
         if i < call.end_line - 1:
-            line += '\\'
+            line += ' \\'
         elif last_assert_line.strip():
-            line += '\\'
+            line += ' \\'
         else:
             line = line.rstrip()
         content_list[i] = line
 
 
 def remove_msg_param(call: Call, content_list: List[str]) -> None:
-    lines_to_check = range(call.line, call.end_line) or [call.line]
+    lines_to_check = range(call.line, call.end_line + 1) or [call.line]
     for line_no in lines_to_check:
         line = content_list[line_no]
         if 'msg' not in line:
@@ -211,16 +224,19 @@ def remove_msg_param(call: Call, content_list: List[str]) -> None:
 
 def remove_trailing_comma(call: Call, contents: List[str]) -> None:
     last = call.end_line
-    penultimate = call.end_line - 1
-    if not contents[last].strip() and contents[penultimate].endswith(','):
-        contents[penultimate] = contents[penultimate][:-1]
+    if contents[last].endswith(','):
+        contents[last] = contents[last][:-1]
 
 
 def rewrite_asserts(contents: str) -> str:
     tokens = src_to_tokens(contents)
     visitor = Visitor(tokens).visit_text(contents)
     content_list = contents.splitlines()
+
+    line_offset = 0
     for call in visitor.calls:
+        call.line -= line_offset
+        call.end_line -= line_offset
         assert_type = ASSERT_TYPES[call.name]
         ops_after = [
             tok for i, tok in enumerate(tokens)
@@ -228,7 +244,7 @@ def rewrite_asserts(contents: str) -> str:
         ]
 
         comma = find_outer_comma(ops_after)
-        rewrite_parens(ops_after, call, content_list, comma)
+        deleted_end_line = rewrite_parens(ops_after, call, content_list, comma)
         remove_msg_param(call, content_list)
         remove_trailing_comma(call, content_list)
 
@@ -240,7 +256,7 @@ def rewrite_asserts(contents: str) -> str:
             if comma is None:
                 raise ValueError('A comma is expected in binary asserts')
 
-            i = comma.line - 1
+            i = comma.line - 1 - line_offset
             line = content_list[i]
             line = remove_token(
                 line,
@@ -271,9 +287,10 @@ def rewrite_asserts(contents: str) -> str:
         suffix = assert_type.suffix
         end_line = content_list[call.end_line]
         end_line += suffix
-
-        add_slashes(call, content_list)
-
         content_list[call.end_line] = end_line
+
+        did_combine = combine_assert(call, content_list)
+        line_offset += int(did_combine) + int(deleted_end_line)
+        add_slashes(call, content_list)
 
     return '\n'.join(content_list)

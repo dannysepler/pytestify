@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+## [1.0.5] - July 26th 2021
+
+- If assert is alone, combine the next line with it
+
 ## [1.0.4] - July 25th 2021
 
 - `import pytest` is next to other imports

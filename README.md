@@ -93,15 +93,15 @@ the near future. You can still use [unittest's implementation](https://stackover
 Since `assert (a == b, 'err')`  is equivalent to asserting a tuple, and thus is always `True`.
 
 ```python
-self.assertEqual(    # assert \
-    a,               #     a == \
-    b,               #     b
+self.assertEqual(    # assert a == \
+    a,               #     b
+    b,
 )
 
-self.assertEqual(    # assert \
-    a,               #     a == \
-    b,               #     b,
-    msg='oh no!'     #     'oh no!'
+self.assertEqual(    # assert a == \
+    a,               #     b,
+    b,               #     'oh no!'
+    msg='oh no!'
 )
 ```
 

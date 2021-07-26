@@ -93,9 +93,7 @@ def test_rewrite_simple_asserts(before, after):
             'self.assertIsNone(\n'
             '    a\n'
             ')',
-            'assert \\\n'
-            '    a is None\n'
-            '',
+            'assert a is None',
         ),
         (
             'self.assertEqual(\n'
@@ -105,23 +103,19 @@ def test_rewrite_simple_asserts(before, after):
             '        2,\n'
             '    ]\n'
             ')',
-            'assert \\\n'
-            '    a == \\\n'
+            'assert a == \\\n'
             '    [\n'
             '        1,\n'
             '        2,\n'
-            '    ]\n'
-            '',
+            '    ]',
         ),
         (
             'self.assertEqual(\n'
             '    a,\n'
             '    b,\n'
             ')',
-            'assert \\\n'
-            '    a == \\\n'
-            '    b\n'
-            '',
+            'assert a == \\\n'
+            '    b',
         ),
         (
             'self.assertDictEqual(a, {\n'
@@ -157,21 +151,17 @@ def test_rewrite_complex_asserts(before, after):
             '   b,\n'
             "   msg='Error'\n"
             ')',
-            'assert \\\n'
-            '   a == \\\n'
+            'assert a == \\\n'
             '   b,\n'
-            "   'Error'\n"
-            '',
+            "   'Error'",
         ),
         (
             'self.assertEquals(\n'
             '   a.func(),\n'
             '   b\n'
             ')',
-            'assert \\\n'
-            '   a.func() == \\\n'
-            '   b\n'
-            '',
+            'assert a.func() == \\\n'
+            '   b',
         ),
         (
             'self.assertAlmostEquals(\n'
@@ -179,11 +169,9 @@ def test_rewrite_complex_asserts(before, after):
             '   b,\n'
             '   places=2\n'
             ')',
-            'assert \\\n'
-            '   a == pytest.approx(\n'
+            'assert a == pytest.approx(\n'
             '   b,\n'
-            '   abs=0.01)\n'
-            '',
+            '   abs=0.01)',
         ),
     ],
 )
