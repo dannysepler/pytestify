@@ -197,15 +197,12 @@ def add_slashes(call: Call, content_list: List[str]) -> None:
         tokens = src_to_tokens(line)
         comments = [t for t in tokens if t.name == 'COMMENT']
 
-        # add trailing slash to all lines except the last with content
-        if i < call.end_line - 1 or last_assert_line.strip():
-            if comments:
-                first_com = comments[0].utf8_byte_offset
-                line = line[:first_com] + '\\ ' + line[first_com:]
-            else:
-                line += ' \\'
-        else:
-            line = line.rstrip()
+        should_add = i < call.end_line - 1 or last_assert_line.strip()
+        if should_add and comments:
+            loc = comments[0].utf8_byte_offset
+            line = line[:loc].rstrip() + ' \\  ' + line[loc:]
+        elif should_add:
+            line += ' \\'
         content_list[i] = line
 
 

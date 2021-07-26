@@ -167,10 +167,10 @@ def test_rewrite_complex_asserts(before, after):
         ),
         (
             'self.assertEquals(\n'
-            '   a, # some comment\n'
+            '   a,  # some comment\n'
             '   b\n'
             ')',
-            'assert a == \\ # some comment\n'
+            'assert a == \\  # some comment\n'
             '   b',
         ),
         (
