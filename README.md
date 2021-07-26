@@ -28,7 +28,7 @@ package, so there are bound to be issues.
 
 ### Test class names
 
-Remove TestCase parent class, and make sure tests start with `Test`
+Remove `TestCase` parent class, and make sure tests start with `Test`. We are keeping the test classes themselves, but you can remove them manually.
 
 ```python
 class TestThing(unittest.TestCase):  # class TestThing:

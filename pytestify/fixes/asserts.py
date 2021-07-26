@@ -178,14 +178,13 @@ def rewrite_parens(
 
 
 def combine_assert(call: Call, content_list: List[str]) -> bool:
-    if call.line == call.end_line:
-        return False
     if content_list[call.line].strip() == 'assert':
         second_line = content_list.pop(call.line + 1)
         content_list[call.line] += second_line.lstrip()
         call.end_line -= 1
         return True
-    return False
+    else:
+        return False
 
 
 def add_slashes(call: Call, content_list: List[str]) -> None:
@@ -196,18 +195,24 @@ def add_slashes(call: Call, content_list: List[str]) -> None:
         if line.endswith(('{', '[', '(', ',')):
             continue
 
+        tokens = src_to_tokens(line)
+        comments = [t for t in tokens if t.name == 'COMMENT']
+
+        print(comments)
         # add trailing slash to all lines except the last with content
-        if i < call.end_line - 1:
-            line += ' \\'
-        elif last_assert_line.strip():
-            line += ' \\'
+        if i < call.end_line - 1 or last_assert_line.strip():
+            if comments:
+                first_com = comments[0].utf8_byte_offset
+                line = line[:first_com] + '\\ ' + line[first_com:]
+            else:
+                line += ' \\'
         else:
             line = line.rstrip()
         content_list[i] = line
 
 
 def remove_msg_param(call: Call, content_list: List[str]) -> None:
-    lines_to_check = range(call.line, call.end_line + 1) or [call.line]
+    lines_to_check = range(call.line, call.end_line + 1)
     for line_no in lines_to_check:
         line = content_list[line_no]
         if 'msg' not in line:

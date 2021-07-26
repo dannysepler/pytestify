@@ -118,6 +118,16 @@ def test_rewrite_simple_asserts(before, after):
             '    b',
         ),
         (
+            'self.assertEqual(\n'
+            '    a, b\n'
+            ')\n'
+            'self.assertEqual(\n'
+            '    c, d\n'
+            ')',
+            'assert a == b\n'
+            'assert c == d',
+        ),
+        (
             'self.assertDictEqual(a, {\n'
             "    'a': 1,\n"
             '})',
@@ -154,6 +164,14 @@ def test_rewrite_complex_asserts(before, after):
             'assert a == \\\n'
             '   b,\n'
             "   'Error'",
+        ),
+        (
+            'self.assertEquals(\n'
+            '   a, # some comment\n'
+            '   b\n'
+            ')',
+            'assert a == \\ # some comment\n'
+            '   b',
         ),
         (
             'self.assertEquals(\n'
