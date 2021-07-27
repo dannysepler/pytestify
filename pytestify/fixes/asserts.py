@@ -1,5 +1,6 @@
 import ast
 import re
+from tokenize import TokenError
 from typing import List, NamedTuple, Optional
 
 from tokenize_rt import Token, src_to_tokens
@@ -188,20 +189,27 @@ def combine_assert(call: Call, content_list: List[str]) -> bool:
 
 
 def add_slashes(call: Call, content_list: List[str]) -> None:
-    last_assert_line = content_list[call.end_line]
+    contents = '\n'.join(content_list[call.line: call.end_line + 1])
+    try:
+        tokens = src_to_tokens(contents)
+    except TokenError:
+        # there's a special character in the line
+        tokens = []
+
     for i in range(call.line, call.end_line):
         line = content_list[i]
 
         if line.endswith(('{', '[', '(', ',')):
             continue
-        tokens = src_to_tokens(line)
-        comments = [t for t in tokens if t.name == 'COMMENT']
+        comments = [
+            t for t in tokens if t.name ==
+            'COMMENT' and t.line == i - call.line + 1
+        ]
 
-        should_add = i < call.end_line - 1 or last_assert_line.strip()
-        if should_add and comments:
+        if comments:
             loc = comments[0].utf8_byte_offset
             line = line[:loc].rstrip() + ' \\  ' + line[loc:]
-        elif should_add:
+        else:
             line += ' \\'
         content_list[i] = line
 

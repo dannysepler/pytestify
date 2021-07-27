@@ -191,6 +191,22 @@ def test_rewrite_complex_asserts(before, after):
             '   b,\n'
             '   abs=0.01)',
         ),
+        (
+            'self.assertEquals(\n'
+            '   [\n'
+            '       1,\n'
+            '   ],\n'
+            '   [\n'
+            '       1,\n'
+            '   ]\n'
+            ')',
+            'assert [\n'
+            '       1,\n'
+            '   ] == \\\n'
+            '   [\n'
+            '       1,\n'
+            '   ]',
+        ),
     ],
 )
 def test_remove_msg_param(before, after):
