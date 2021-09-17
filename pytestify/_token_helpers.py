@@ -23,14 +23,17 @@ def operators(tokens: List[Token]) -> Iterable[Token]:
     return (tok for tok in tokens if tok.name == 'OP')
 
 
-def find_outer_comma(tokens: List[Token]) -> Optional[Token]:
+def find_outer_comma(
+    tokens: List[Token],
+    stack_loc: int = 1,
+) -> Optional[Token]:
     stack = 0
     for op in operators(tokens):
         if op.src in ['(', '[', '{']:
             stack += 1
         if op.src in [')', ']', '}']:
             stack -= 1
-        if op.src == ',' and stack in (0, 1):
+        if op.src == ',' and stack <= stack_loc:
             return op
     return None
 

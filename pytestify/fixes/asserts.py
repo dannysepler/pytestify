@@ -196,10 +196,15 @@ def add_slashes(call: Call, content_list: List[str]) -> None:
         # there's a special character in the line
         tokens = []
 
+    comma = find_outer_comma(tokens, stack_loc=0)
     for i in range(call.line, call.end_line):
         line = content_list[i]
 
-        if line.endswith(('{', '[', '(', ',')):
+        if line.endswith(',') and comma and comma.line - 1 == i:
+            # this is on multiline asserts with an error message
+            # otherwise, the comma is probably between elements in a sequence
+            pass
+        elif line.endswith(('{', '[', '(', ',')):
             continue
         comments = [
             t for t in tokens if t.name ==

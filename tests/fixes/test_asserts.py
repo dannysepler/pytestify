@@ -162,7 +162,7 @@ def test_rewrite_complex_asserts(before, after):
             "   msg='Error'\n"
             ')',
             'assert a == \\\n'
-            '   b,\n'
+            '   b, \\\n'
             "   'Error'",
         ),
         (
