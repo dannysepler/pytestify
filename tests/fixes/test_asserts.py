@@ -166,6 +166,32 @@ def test_rewrite_complex_asserts(before, after):
             "   'Error'",
         ),
         (
+            '# some comment\n'
+            'self.assertEquals(\n'
+            '   a,\n'
+            '   b,\n'
+            "   msg='Error'\n"
+            ')',
+            '# some comment\n'
+            'assert a == \\\n'
+            '   b, \\\n'
+            "   'Error'",
+        ),
+        (
+            '# some comment\n'
+            '# some other comment\n'
+            'self.assertEquals(\n'
+            '   a,\n'
+            '   b,\n'
+            "   msg='Error'\n"
+            ')',
+            '# some comment\n'
+            '# some other comment\n'
+            'assert a == \\\n'
+            '   b, \\\n'
+            "   'Error'",
+        ),
+        (
             'self.assertEquals(\n'
             '   a,  # some comment\n'
             '   b\n'

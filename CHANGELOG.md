@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+## [1.0.7] - September 16th 2021
+
+- Another edge case involving multi-line comments and trailing slashes
+
 ## [1.0.6] - September 16th 2021
 
 - Fix edge case where commas in multiline asserts don't have trailing slashes but should

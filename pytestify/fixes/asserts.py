@@ -200,7 +200,7 @@ def add_slashes(call: Call, content_list: List[str]) -> None:
     for i in range(call.line, call.end_line):
         line = content_list[i]
 
-        if line.endswith(',') and comma and comma.line - 1 == i:
+        if line.endswith(',') and comma and comma.line == i - call.line + 1:
             # this is on multiline asserts with an error message
             # otherwise, the comma is probably between elements in a sequence
             pass
