@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+## [1.0.6] - September 16th 2021
+
+- Fix edge case where commas in multiline asserts don't have trailing slashes but should
+- Two spaces between trailing slashes and inline comments
+
 ## [1.0.5] - July 26th 2021
 
 - If assert is alone, combine the next line with it

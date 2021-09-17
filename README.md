@@ -99,7 +99,7 @@ self.assertEqual(    # assert a == \
 )
 
 self.assertEqual(    # assert a == \
-    a,               #     b,
+    a,               #     b, \
     b,               #     'oh no!'
     msg='oh no!'
 )
