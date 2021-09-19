@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+
+## [1.0.8] - September 19th 2021
+
+- Fix: A class called `ThingTestCase` should be renamed to `TestThing`
+
 ## [1.0.7] - September 16th 2021
 
 - Another edge case involving multi-line comments and trailing slashes

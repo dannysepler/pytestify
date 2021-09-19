@@ -40,6 +40,7 @@ def remove_base_class(contents: str) -> str:
         line = content_list[i]
         for variation in variations:
             line = line.replace(variation, '')
+            orig_name = orig_name.replace(variation, '')
 
         # delete empty paren if they exist
         line = line.replace(f'{orig_name}():', f'{orig_name}:')

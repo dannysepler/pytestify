@@ -11,6 +11,11 @@ from pytestify.fixes.base_class import remove_base_class
         ('class TestCls(TestCase): pass', 'class TestCls: pass'),
         ('class ClsTests(TestCase): pass', 'class TestCls: pass'),
         ('class ClsTest(TestCase): pass', 'class TestCls: pass'),
+        (
+            'class ThingTestCase(unittest.TestCase): pass',
+            'class TestThing: pass',
+        ),
+        ('class ThingTestCase(TestCase): pass', 'class TestThing: pass'),
     ],
 )
 def test_remove_base_class(before, after):
