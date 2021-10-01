@@ -303,7 +303,10 @@ def rewrite_asserts(contents: str) -> str:
         # for equality comparators, turn the next comma into ' ==', etc
         if assert_type.type == 'binary':
             operator = assert_type.op
-            if should_swap_eq_for_is(call, tokens, comma):
+            if (
+                operator == ' ==' and
+                should_swap_eq_for_is(call, tokens, comma)
+            ):
                 operator = ' is'
 
             strip = assert_type.strip
