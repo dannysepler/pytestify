@@ -45,6 +45,14 @@ def test_rewrite_simple_asserts(before, after):
     'before, after', [
         ('self.assertEqual([a, b, c], d)', 'assert [a, b, c] == d'),
         ('self.assertEqual(len(a), len(b))', 'assert len(a) == len(b)'),
+        ('self.assertEqual(1, None)', 'assert 1 is None'),
+        ('self.assertEqual(a, True)', 'assert a is True'),
+        ('self.assertEqual(a, False)', 'assert a is False'),
+        (
+            'self.assertEqual(a, [True, False, None])',
+            'assert a == [True, False, None]',
+        ),
+        ('self.assertEqual(a, "True")', 'assert a == "True"'),
         (
             'self.assertEqual(min(1, 2, 3), min(1, 2, 3))',
             'assert min(1, 2, 3) == min(1, 2, 3)',
