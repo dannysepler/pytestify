@@ -137,10 +137,10 @@ class Visitor(NodeVisitor):
                 # assertAlmostEqual / assertAlmostEquals
                 const = keyword.value
                 try:
-                    kwargs['places'] = const.value
+                    kwargs['places'] = const.value  # type: ignore
                 except AttributeError:
                     # Prior to Python 3.8, const is actually a ast.Num object
-                    kwargs['places'] = const.n
+                    kwargs['places'] = const.n  # type: ignore
         end_line = close_paren.line
         self.calls.append(
             Call(method, line - 1, call_idx, end_line - 1, **kwargs),
@@ -239,6 +239,41 @@ def remove_msg_param(call: Call, content_list: List[str]) -> None:
         content_list[line_no] = line
 
 
+def should_swap_eq_for_is(
+    call: Call,
+    tokens: List[Token],
+    comma: Token,
+) -> bool:
+    toks_after = [
+        tok for i, tok in enumerate(tokens)
+        if i > call.token_idx and
+        tok.name not in ('UNIMPORTANT_WS', 'ENDMARKER')
+    ]
+    l_tokens, r_tokens = [], []
+    started_paren = False
+    reached_comma = False
+
+    for tok in toks_after:
+        if started_paren:
+            if not reached_comma and tok == comma:
+                reached_comma = True
+            elif not reached_comma:
+                l_tokens.append(tok)
+            else:
+                r_tokens.append(tok)
+        elif tok.name == 'OP' and tok.src == '(':
+            started_paren = True
+
+    if r_tokens and r_tokens[-1].name == 'OP' and r_tokens[-1].src == ')':
+        r_tokens = r_tokens[:-1]
+
+    return any(
+        len(tokens) == 1 and tokens[0].name == 'NAME'
+        and tokens[0].src in ['None', 'True', 'False']
+        for tokens in [l_tokens, r_tokens]
+    )
+
+
 def remove_trailing_comma(call: Call, contents: List[str]) -> None:
     last = call.end_line
     if contents[last].endswith(','):
@@ -268,6 +303,9 @@ def rewrite_asserts(contents: str) -> str:
         # for equality comparators, turn the next comma into ' ==', etc
         if assert_type.type == 'binary':
             operator = assert_type.op
+            if should_swap_eq_for_is(call, tokens, comma):
+                operator = ' is'
+
             strip = assert_type.strip
 
             if comma is None:
