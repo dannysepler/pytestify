@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+## [1.1.0] - October 1st 2021
+
 - Feature: Rewrites `self.assertEqual(a, None)` to `assert a is None` rather than `assert a == None`
 
 ## [1.0.8] - September 19th 2021
