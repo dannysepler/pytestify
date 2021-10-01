@@ -136,7 +136,11 @@ class Visitor(NodeVisitor):
             if keyword.arg == 'places':
                 # assertAlmostEqual / assertAlmostEquals
                 const = keyword.value
-                kwargs['places'] = getattr(const, 'value', None)
+                try:
+                    kwargs['places'] = const.value
+                except AttributeError:
+                    # Prior to Python 3.8, const is actually a ast.Num object
+                    kwargs['places'] = const.n
         end_line = close_paren.line
         self.calls.append(
             Call(method, line - 1, call_idx, end_line - 1, **kwargs),
