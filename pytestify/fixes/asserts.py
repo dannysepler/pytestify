@@ -89,6 +89,7 @@ class Call:
         token_idx: int,
         end_line: int,
         places: Optional[int] = None,
+        delta: Optional[int] = None,
     ):
         self.name = name
         self.line = line
@@ -96,17 +97,21 @@ class Call:
         self.end_line = end_line
         self.offset = 0
         self.places = places
+        self.delta = delta
 
     @property
     def line_length(self) -> int:
         return (self.end_line - self.line) + 1
 
     @property
-    def rel(self) -> Optional[int]:
+    def abs(self) -> Optional[int]:
         ''' useful for pytest.approx '''
-        if self.places is None:
+        if self.places is not None:
+            return 10 ** (self.places * -1)
+        elif self.delta is not None:
+            return self.delta
+        else:
             return None
-        return 10 ** (self.places * -1)
 
 
 class Visitor(NodeVisitor):
@@ -133,14 +138,15 @@ class Visitor(NodeVisitor):
         close_paren = find_closing_paren(open_paren, operators)
         kwargs = {}
         for keyword in call.keywords or []:
-            if keyword.arg == 'places':
+            if keyword.arg in ['places', 'delta']:
                 # assertAlmostEqual / assertAlmostEquals
+                arg = keyword.arg
                 const = keyword.value
                 try:
-                    kwargs['places'] = const.value  # type: ignore
+                    kwargs[arg] = const.value  # type: ignore
                 except AttributeError:
                     # Prior to Python 3.8, const is actually a ast.Num object
-                    kwargs['places'] = const.n  # type: ignore
+                    kwargs[arg] = const.n  # type: ignore
         end_line = close_paren.line
         self.calls.append(
             Call(method, line - 1, call_idx, end_line - 1, **kwargs),
@@ -329,14 +335,12 @@ def rewrite_asserts(contents: str) -> str:
         prefix = assert_type.prefix
         line = line.replace(f'self.{call.name}', f'assert {prefix}')
         content_list[call.line] = line
-        if call.places:
+        if call.places or call.delta:
             for i in range(call.line, call.end_line + 1):
-                if 'places' in content_list[i]:
-                    line = content_list[i]
-                    line = line.replace(
-                        f'places={call.places}', f'abs={call.rel}',
-                    )
-                    content_list[i] = line
+                line = content_list[i]
+                line = line.replace(f'places={call.places}', f'abs={call.abs}')
+                line = line.replace(f'delta={call.delta}', f'abs={call.abs}')
+                content_list[i] = line
 
         # if the last line is blank, insert the suffix on the line before
         if not content_list[call.end_line].strip():
