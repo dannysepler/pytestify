@@ -31,10 +31,10 @@ from pytestify.fixes.asserts import rewrite_asserts
         ('self.assertNotRegex(a, b)', 'assert not a.search(b)'),
         ('self.assertIsInstance(a, b)', 'assert isinstance(a, b)'),
         ('self.assertAlmostEquals(a, b)', 'assert a == pytest.approx(b)'),
-        # (
-        #     'self.assertAlmostEquals(a, b, places=2)',
-        #     'assert a == pytest.approx(b, abs=0.01)',
-        # ),
+        (
+            'self.assertAlmostEquals(a, b, places=2)',
+            'assert a == pytest.approx(b, abs=0.01)',
+        ),
     ],
 )
 def test_rewrite_simple_asserts(before, after):
@@ -207,16 +207,16 @@ def test_rewrite_complex_asserts(before, after):
             'assert a.func() == \\\n'
             '   b',
         ),
-        # (
-        #     'self.assertAlmostEquals(\n'
-        #     '   a,\n'
-        #     '   b,\n'
-        #     '   places=2\n'
-        #     ')',
-        #     'assert a == pytest.approx(\n'
-        #     '   b,\n'
-        #     '   abs=0.01)',
-        # ),
+        (
+            'self.assertAlmostEquals(\n'
+            '   a,\n'
+            '   b,\n'
+            '   places=2\n'
+            ')',
+            'assert a == pytest.approx(\n'
+            '   b,\n'
+            '   abs=0.01)',
+        ),
         (
             'self.assertEquals(\n'
             '   [\n'
