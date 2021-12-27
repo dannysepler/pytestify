@@ -49,13 +49,6 @@ ASSERT_TYPES = {
         suffix=')',
         strip=True,
     ),
-    'assertItemsEqual': _Assert(
-        'binary',
-        prefix='sorted(',
-        op=') == sorted(',
-        suffix=')',
-        strip=True,
-    ),
     'assertIsInstance': _Assert(
         'binary',
         prefix='isinstance(',
@@ -65,6 +58,22 @@ ASSERT_TYPES = {
     'assertAlmostEqual': _Assert(
         'binary',
         op=' == pytest.approx(',
+        suffix=')',
+        strip=True,
+    ),
+    # The following are risky rewrites, and thus must be
+    # opted-in by the user
+    'assertCountEqual': _Assert(
+        'binary',
+        prefix='sorted(',
+        op=') == sorted(',
+        suffix=')',
+        strip=True,
+    ),
+    'assertItemsEqual': _Assert(
+        'binary',
+        prefix='sorted(',
+        op=') == sorted(',
         suffix=')',
         strip=True,
     ),
@@ -286,13 +295,17 @@ def remove_trailing_comma(call: Call, contents: List[str]) -> None:
         contents[last] = contents[last][:-1]
 
 
-def rewrite_asserts(contents: str) -> str:
+def rewrite_asserts(contents: str, *, with_count_equal: bool = False) -> str:
     tokens = src_to_tokens(contents)
     visitor = Visitor(tokens).visit_text(contents)
     content_list = contents.splitlines()
 
     line_offset = 0
     for call in visitor.calls:
+        if not with_count_equal and call.name in (
+            'assertCountEqual', 'assertItemsEqual',
+        ):
+            continue
         call.line -= line_offset
         call.end_line -= line_offset
         assert_type = ASSERT_TYPES[call.name]
