@@ -26,7 +26,7 @@ package, so there are bound to be issues.
 
 ### Optional arguments
 
-`--with-count-equal`: [more info](# assertCountEqual)
+`--with-count-equal`: [more info](#assertCountEqual)
 
 ## Implemented features
 
