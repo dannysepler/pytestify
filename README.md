@@ -82,6 +82,7 @@ self.assertAlmostEqual(a, b, places=2)
 self.assertAlmostEquals(a, b, delta=2)
 #   assert a == pytest.approx(b, abs=2)
 
+
 # improves the assert if reasonable
 self.assertEqual(a, None)   # assert a is None
 self.assertEqual(a, True)   # assert a is True
