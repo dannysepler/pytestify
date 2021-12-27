@@ -18,7 +18,6 @@ from pytestify.fixes.asserts import rewrite_asserts
         ('self.assertDictEqual(a, b)', 'assert a == b'),
         ('self.assertListEqual(a, b)', 'assert a == b'),
         ('self.assertSetEqual(a, b)', 'assert a == b'),
-        ('self.assertItemsEqual(a, b)', 'assert sorted(a) == sorted(b)'),
         ('self.assertIs(a, b)', 'assert a is b'),
         ('self.assertIsNot(a, b)', 'assert a is not b'),
         ('self.assertIn(a, b)', 'assert a in b'),
@@ -260,6 +259,64 @@ def test_rewrite_complex_asserts(before, after):
 )
 def test_remove_msg_param(before, after):
     assert rewrite_asserts(before) == after
+
+
+@pytest.mark.parametrize(
+    'before, with_count_equal, after', [
+        # opted-out
+        ('self.assertItemsEqual(a, b)', False, 'self.assertItemsEqual(a, b)'),
+        ('self.assertCountEqual(a, b)', False, 'self.assertCountEqual(a, b)'),
+        (
+            'self.assertItemsEqual(\n'
+            '    a,\n'
+            '    b\n'
+            ')',
+            False,
+            'self.assertItemsEqual(\n'
+            '    a,\n'
+            '    b\n'
+            ')',
+        ),
+        (
+            'self.assertCountEqual(\n'
+            '    a,\n'
+            '    b\n'
+            ')',
+            False,
+            'self.assertCountEqual(\n'
+            '    a,\n'
+            '    b\n'
+            ')',
+        ),
+
+        # opted-in
+        ('self.assertItemsEqual(a, b)', True, 'assert sorted(a) == sorted(b)'),
+        ('self.assertCountEqual(a, b)', True, 'assert sorted(a) == sorted(b)'),
+        # TODO: better format the following multilines
+        (
+            'self.assertItemsEqual(\n'
+            '    a,\n'
+            '    b\n'
+            ')',
+            True,
+            'assert sorted(\n'
+            '    a) == sorted(\n'
+            '    b)',
+        ),
+        (
+            'self.assertCountEqual(\n'
+            '    a,\n'
+            '    b\n'
+            ')',
+            True,
+            'assert sorted(\n'
+            '    a) == sorted(\n'
+            '    b)',
+        ),
+    ],
+)
+def test_opt_in_rewrites(before, with_count_equal, after):
+    assert rewrite_asserts(before, with_count_equal=with_count_equal) == after
 
 
 @pytest.mark.parametrize(

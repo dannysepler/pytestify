@@ -39,7 +39,10 @@ def _fix_path(
     try:
         contents = remove_base_class(orig_contents)
         contents = rewrite_method_name(contents)
-        contents = rewrite_asserts(contents)
+        contents = rewrite_asserts(
+            contents,
+            with_count_equal=args.with_count_equal,
+        )
         contents = rewrite_pytest_funcs(contents)
         contents = add_pytest_import(contents)
 
@@ -66,6 +69,7 @@ def _fix_path(
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('filepaths', nargs='*')
+    parser.add_argument('--with-count-equal', action='store_true')
     parser.add_argument('--show-traceback', action='store_true')
     args = parser.parse_args(argv)
 

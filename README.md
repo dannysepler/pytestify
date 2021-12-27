@@ -21,6 +21,10 @@ or
 
 `pytestify path/to/folder/`
 
+**Optional arguments**
+
+- [--with-count-equal](#assertCountEqual)
+
 Please read over all changes that pytestify makes. It's a new
 package, so there are bound to be issues.
 
@@ -67,7 +71,6 @@ self.assertNotIn(a, b)      # assert a not in b
 self.assertListEqual(a, b)  # assert a == b
 self.assertDictEqual(a, b)  # assert a == b
 self.assertSetEqual(a, b)   # assert a == b
-self.assertItemsEqual(a, b) # assert sorted(a) == sorted(b)
 self.assertGreater(a, b)    # assert a > b
 self.assertLess(a, b)       # assert a < b
 self.assertGreaterEqual(a, b)  # assert a >= b
@@ -92,9 +95,21 @@ self.assertEqual(a, True)   # assert a is True
 self.assertTrue(a, msg='oh no!')  # assert a, 'oh no!'
 ```
 
-Note: `assertCountEqual` is NOT supported here. It is tricky to implement, and pytest has voiced
-[hesitations](https://github.com/pytest-dev/pytest/issues/5548) about including it in
-the near future. You can still use [unittest's implementation](https://stackoverflow.com/a/45946306).
+### assertCountEqual
+
+Since they're risky, the following two are opt-in.
+
+(Use `pytest path/to/file --with-count-equal`).
+
+```python
+self.assertItemsEqual(a, b)  # assert sorted(a) == sorted(b)
+self.assertCountEqual(a, b)  # assert sorted(a) == sorted(b)
+```
+
+Note that pytest has no version of either of these methods. See
+[this thread](https://github.com/pytest-dev/pytest/issues/5548) for more
+information. You can also use
+[unittest's implementation](https://stackoverflow.com/a/45946306).
 
 ### Multi-line asserts
 
