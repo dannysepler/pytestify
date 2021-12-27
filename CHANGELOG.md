@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+## [1.2.0] - December 27th 2021
+
+- `--with-count-equal` optional argument to rewrite `assertCountEqual`
+- Rewrite `delta=` in `assertAlmostEqual`
+
 ## [1.1.0] - October 1st 2021
 
 - Feature: Rewrites `self.assertEqual(a, None)` to `assert a is None` rather than `assert a == None`
