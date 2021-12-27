@@ -99,6 +99,8 @@ self.assertTrue(a, msg='oh no!')  # assert a, 'oh no!'
 
 Since they're risky, the following two are opt-in.
 
+(Use `pytest path/to/file --with-count-equal`).
+
 ```python
 self.assertItemsEqual(a, b)  # assert sorted(a) == sorted(b)
 self.assertCountEqual(a, b)  # assert sorted(a) == sorted(b)
