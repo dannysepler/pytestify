@@ -24,7 +24,7 @@ or
 Please read over all changes that pytestify makes. It's a new
 package, so there are bound to be issues.
 
-### Optional arguments
+**Optional arguments**
 
 - [--with-count-equal](#assertCountEqual)
 
