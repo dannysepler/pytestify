@@ -21,12 +21,12 @@ or
 
 `pytestify path/to/folder/`
 
-Please read over all changes that pytestify makes. It's a new
-package, so there are bound to be issues.
-
 **Optional arguments**
 
 - [--with-count-equal](#assertCountEqual)
+
+Please read over all changes that pytestify makes. It's a new
+package, so there are bound to be issues.
 
 ## Implemented features
 
