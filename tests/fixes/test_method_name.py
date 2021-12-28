@@ -31,6 +31,9 @@ def test_doesnt_rewrite_if_keeping_casing(line):
     'line', [
         '# def setUp(self): pass',
         'def setup(self): pass',
+        'def camelCaseDoesntStartWithTest(self): pass',
+        'def testCamelCaseNotInClass(): pass',
+        'def testCamelCaseNotInClass(not_self): pass',
     ],
 )
 def test_doesnt_rewrite_method_name(line):
