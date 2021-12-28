@@ -1,5 +1,6 @@
 import ast
 import re
+import sys
 from tokenize import TokenError
 from typing import List, NamedTuple, Optional
 
@@ -150,10 +151,16 @@ class Visitor(NodeVisitor):
             if keyword.arg in ['places', 'delta']:
                 # assertAlmostEqual / assertAlmostEquals
                 arg = keyword.arg
+                if isinstance(keyword.value, ast.Call):
+                    # this is likely a `delta=timedelta() / datetime()`.
+                    # pytest doesn't yet support these
+                    # https://github.com/pytest-dev/pytest/issues/8395
+                    continue
+
                 const = keyword.value
-                try:
+                if sys.version_info >= (3, 8):
                     kwargs[arg] = const.value  # type: ignore
-                except AttributeError:
+                else:
                     # Prior to Python 3.8, const is actually a ast.Num object
                     kwargs[arg] = const.n  # type: ignore
         end_line = close_paren.line

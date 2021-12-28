@@ -28,7 +28,6 @@ jobs:
     - name: Install pytestify
       run: |
         pip install .
-        pip install pytest
 
     - name: Run tests
       run: |

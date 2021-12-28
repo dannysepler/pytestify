@@ -38,6 +38,13 @@ from pytestify.fixes.asserts import rewrite_asserts
             'self.assertAlmostEquals(a, b, delta=2)',
             'assert a == pytest.approx(b, abs=2)',
         ),
+        (
+            'self.assertAlmostEquals(a, b, delta=timedelta(minutes=1))',
+            # delta as a timedelta isn't supported by pytest yet,
+            # just check it doesn't fail
+            # https://github.com/pytest-dev/pytest/issues/8395
+            'assert a == pytest.approx(b, delta=timedelta(minutes=1))',
+        ),
     ],
 )
 def test_rewrite_simple_asserts(before, after):
@@ -324,9 +331,6 @@ def test_opt_in_rewrites(before, with_count_equal, after):
         # look like asserts, but aren't
         'self.someFunction()',
         'assertEqual(a, b)',
-
-        # unsupported functions
-        'self.assertCountEqual(a, b)',
     ],
 )
 def test_doesnt_rewrite_asserts(line):
