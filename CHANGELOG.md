@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+## [1.3.1] - December 28th 2021
+
+- Bugfix: rewriting from camelCase to snake_case only occurs on test files
+
 ## [1.3.0] - December 28th 2021
 
 - Doesn't break on `assertAlmostEqual(a, b, delta=timedelta(1))`
