@@ -51,15 +51,6 @@ def setUpClass(self):     # def setup_class(self):
 def tearDownClass(self):  # def teardown_class(self):
 ```
 
-### camelCase to snake_case
-
-Disable this behavior with `--keep-method-casing`
-
-```python
-def testThing(self):      # def test_thing(self):
-def testHTTPThing(self):  # def test_httpthing(self):
-```
-
 ### Asserts
 
 Rewrite unittest assert methods using the `assert` keyword.
@@ -105,22 +96,6 @@ self.assertEqual(a, True)   # assert a is True
 self.assertTrue(a, msg='oh no!')  # assert a, 'oh no!'
 ```
 
-### assertCountEqual
-
-Since they're risky, the following two are opt-in.
-
-(Use `pytest path/to/file --with-count-equal`).
-
-```python
-self.assertItemsEqual(a, b)  # assert sorted(a) == sorted(b)
-self.assertCountEqual(a, b)  # assert sorted(a) == sorted(b)
-```
-
-Note that pytest has no version of either of these methods. See
-[this thread](https://github.com/pytest-dev/pytest/issues/5548) for more
-information. You can also use
-[unittest's implementation](https://stackoverflow.com/a/45946306).
-
 ### Multi-line asserts
 
 Since `assert (a == b, 'err')`  is equivalent to asserting a tuple, and thus is always `True`.
@@ -137,6 +112,32 @@ self.assertEqual(    # assert a == \
     msg='oh no!'
 )
 ```
+
+
+### camelCase to snake_case
+
+Disable this behavior with `--keep-method-casing`
+
+```python
+def testThing(self):      # def test_thing(self):
+def testHTTPThing(self):  # def test_httpthing(self):
+```
+
+### assertCountEqual
+
+Since they're risky, the following two are opt-in.
+
+(Use `pytest path/to/file --with-count-equal`).
+
+```python
+self.assertItemsEqual(a, b)  # assert sorted(a) == sorted(b)
+self.assertCountEqual(a, b)  # assert sorted(a) == sorted(b)
+```
+
+Note that pytest has no version of either of these methods. See
+[this thread](https://github.com/pytest-dev/pytest/issues/5548) for more
+information. You can also use
+[unittest's implementation](https://stackoverflow.com/a/45946306).
 
 ### Exceptions
 
