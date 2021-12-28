@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+## [1.3.0] - December 28th 2021
+
 - Doesn't break on `assertAlmostEqual(a, b, delta=timedelta(1))`
 - Rewrite functions from camel case to snake case
 
