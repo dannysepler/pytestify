@@ -31,11 +31,9 @@ class Visitor(NodeVisitor):
 
 
 def rewrite_method_name(
-    contents: str,
-    *,
-    keep_method_casing: bool = False,
+    contents: str, *, keep_casing: bool = False,
 ) -> str:
-    visitor = Visitor(keep_casing=keep_method_casing).visit_text(contents)
+    visitor = Visitor(keep_casing=keep_casing).visit_text(contents)
     content_list = contents.splitlines()
     for line_no, method in visitor.methods.items():
         line = content_list[line_no]

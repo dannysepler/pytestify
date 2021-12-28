@@ -40,7 +40,7 @@ def _fix_path(
         contents = remove_base_class(orig_contents)
         contents = rewrite_method_name(
             contents,
-            keep_method_casing=args.keep_method_casing,
+            keep_casing=args.keep_method_casing,
         )
         contents = rewrite_asserts(
             contents,

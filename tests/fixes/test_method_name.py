@@ -24,7 +24,7 @@ def test_rewrite_method_name(before, after):
     ],
 )
 def test_doesnt_rewrite_if_keeping_casing(line):
-    assert rewrite_method_name(line, keep_method_casing=True) == line
+    assert rewrite_method_name(line, keep_casing=True) == line
 
 
 @pytest.mark.parametrize(
