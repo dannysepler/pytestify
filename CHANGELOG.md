@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+- Doesn't break on `assertAlmostEqual(a, b, delta=timedelta(1))`
+- Rewrite functions from camel case to snake case
+
 ## [1.2.0] - December 27th 2021
 
 - `--with-count-equal` optional argument to rewrite `assertCountEqual`

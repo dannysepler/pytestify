@@ -23,6 +23,7 @@ or
 
 **Optional arguments**
 
+- [--keep-method-casing](#camelCasetosnake_case)
 - [--with-count-equal](#assertCountEqual)
 
 Please read over all changes that pytestify makes. It's a new
@@ -48,6 +49,15 @@ def setUp(self):          # def setup_method(self):
 def tearDown(self):       # def teardown_method(self):
 def setUpClass(self):     # def setup_class(self):
 def tearDownClass(self):  # def teardown_class(self):
+```
+
+### camelCase to snake_case
+
+Disable this behavior with `--keep-method-casing`
+
+```python
+def testThing(self):      # def test_thing(self):
+def testHTTPThing(self):  # def test_httpthing(self):
 ```
 
 ### Asserts
