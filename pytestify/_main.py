@@ -38,7 +38,10 @@ def _fix_path(
     # apply fixes
     try:
         contents = remove_base_class(orig_contents)
-        contents = rewrite_method_name(contents)
+        contents = rewrite_method_name(
+            contents,
+            keep_casing=args.keep_method_casing,
+        )
         contents = rewrite_asserts(
             contents,
             with_count_equal=args.with_count_equal,
@@ -71,6 +74,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument('filepaths', nargs='*')
     parser.add_argument('--with-count-equal', action='store_true')
     parser.add_argument('--show-traceback', action='store_true')
+    parser.add_argument('--keep-method-casing', action='store_true')
     args = parser.parse_args(argv)
 
     notes = RuntimeNotes()
