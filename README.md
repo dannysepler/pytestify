@@ -23,7 +23,7 @@ or
 
 **Optional arguments**
 
-- [--keep-method-casing](#camelCasetosnake_case)
+- [--keep-method-casing](#camelCase-to-snake_case)
 - [--with-count-equal](#assertCountEqual)
 
 Please read over all changes that pytestify makes. It's a new
