@@ -155,6 +155,8 @@ class Visitor(NodeVisitor):
                     # this is likely a `delta=timedelta() / datetime()`.
                     # pytest doesn't yet support these
                     # https://github.com/pytest-dev/pytest/issues/8395
+                    #
+                    # still rewrite it, but without specially handling it
                     continue
 
                 const = keyword.value
