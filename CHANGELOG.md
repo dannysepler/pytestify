@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+## [1.3.2] - December 29th 2021
+
+- Bugfix: rewriting from camelCase to snake_case only occurs in test cases in test files
+
 ## [1.3.1] - December 28th 2021
 
 - Bugfix: rewriting from camelCase to snake_case only occurs on test files
