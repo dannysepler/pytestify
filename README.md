@@ -1,6 +1,9 @@
 pytestify
 =========
 
+[![alt](http://img.shields.io/pypi/v/pytestify.svg)](https://pypi.python.org/pypi/pytestify)
+[![alt](https://img.shields.io/conda/vn/conda-forge/pytestify.svg)](https://anaconda.org/conda-forge/pytestify)
+
 A tool to automatically change unittest to pytest. Similar to
 [unittest2pytest](https://github.com/pytest-dev/unittest2pytest),
 but with a few more features and written using AST and tokenize, rather
