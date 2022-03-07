@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from pytestify.fixes.method_name import rewrite_method_name

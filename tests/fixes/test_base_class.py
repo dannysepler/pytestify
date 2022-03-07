@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from pytestify.fixes.base_class import remove_base_class

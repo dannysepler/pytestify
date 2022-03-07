@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import argparse
 import traceback
 from pathlib import Path
-from typing import Optional, Sequence, Union
+from typing import Sequence
 
 from pytestify._ast_helpers import is_valid_syntax
 from pytestify.fixes.asserts import rewrite_asserts
@@ -22,7 +24,7 @@ def _no_ws(s: str) -> str:
 
 
 def _fix_path(
-    filepath: Union[str, Path],
+    filepath: str | Path,
     args: argparse.Namespace,
     notes: RuntimeNotes,
 ) -> int:
@@ -76,7 +78,7 @@ def _fix_path(
     return int(changes_made)
 
 
-def main(argv: Optional[Sequence[str]] = None) -> int:
+def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('filepaths', nargs='*')
     parser.add_argument('--with-count-equal', action='store_true')

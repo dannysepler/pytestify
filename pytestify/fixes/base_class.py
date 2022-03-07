@@ -1,6 +1,7 @@
-from _ast import expr  # isort: skip
+from __future__ import annotations
+
 import ast
-from typing import Dict
+from _ast import expr
 
 from pytestify._ast_helpers import NodeVisitor
 
@@ -17,7 +18,7 @@ def is_test_class(base: expr) -> bool:
 
 class Visitor(NodeVisitor):
     def __init__(self) -> None:
-        self.test_classes: Dict[int, str] = {}
+        self.test_classes: dict[int, str] = {}
 
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
         if any(is_test_class(base) for base in node.bases):

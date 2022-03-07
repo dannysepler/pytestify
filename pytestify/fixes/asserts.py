@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import ast
 import re
 import sys
 from tokenize import TokenError
-from typing import List, NamedTuple, Optional
+from typing import NamedTuple
 
 from tokenize_rt import Token, src_to_tokens
 
@@ -98,8 +100,8 @@ class Call:
         line: int,
         token_idx: int,
         end_line: int,
-        places: Optional[int] = None,
-        delta: Optional[int] = None,
+        places: int | None = None,
+        delta: int | None = None,
     ):
         self.name = name
         self.line = line
@@ -114,7 +116,7 @@ class Call:
         return (self.end_line - self.line) + 1
 
     @property
-    def abs(self) -> Optional[int]:
+    def abs(self) -> int | None:
         ''' useful for pytest.approx '''
         if self.places is not None:
             return 10 ** (self.places * -1)
@@ -125,8 +127,8 @@ class Call:
 
 
 class Visitor(NodeVisitor):
-    def __init__(self, tokens: List[Token]):
-        self.calls: List[Call] = []
+    def __init__(self, tokens: list[Token]):
+        self.calls: list[Call] = []
         self.tokens = tokens
 
     def visit_Call(self, call: ast.Call) -> None:
@@ -172,10 +174,10 @@ class Visitor(NodeVisitor):
 
 
 def rewrite_parens(
-    operators: List[Token],
+    operators: list[Token],
     call: Call,
-    content_list: List[str],
-    comma: Optional[Token],
+    content_list: list[str],
+    comma: Token | None,
 ) -> bool:
     '''
     For single line asserts, remove parantheses
@@ -206,7 +208,7 @@ def rewrite_parens(
         return False
 
 
-def combine_assert(call: Call, content_list: List[str]) -> bool:
+def combine_assert(call: Call, content_list: list[str]) -> bool:
     if content_list[call.line].strip() == 'assert':
         second_line = content_list.pop(call.line + 1)
         content_list[call.line] += second_line.lstrip()
@@ -216,7 +218,7 @@ def combine_assert(call: Call, content_list: List[str]) -> bool:
         return False
 
 
-def add_slashes(call: Call, content_list: List[str]) -> None:
+def add_slashes(call: Call, content_list: list[str]) -> None:
     contents = '\n'.join(content_list[call.line: call.end_line + 1])
     try:
         tokens = src_to_tokens(contents)
@@ -247,7 +249,7 @@ def add_slashes(call: Call, content_list: List[str]) -> None:
         content_list[i] = line
 
 
-def remove_msg_param(call: Call, content_list: List[str]) -> None:
+def remove_msg_param(call: Call, content_list: list[str]) -> None:
     lines_to_check = range(call.line, call.end_line + 1)
     for line_no in lines_to_check:
         line = content_list[line_no]
@@ -265,7 +267,7 @@ def remove_msg_param(call: Call, content_list: List[str]) -> None:
 
 def should_swap_eq_for_is(
     call: Call,
-    tokens: List[Token],
+    tokens: list[Token],
     comma: Token,
 ) -> bool:
     toks_after = [
@@ -298,7 +300,7 @@ def should_swap_eq_for_is(
     )
 
 
-def remove_trailing_comma(call: Call, contents: List[str]) -> None:
+def remove_trailing_comma(call: Call, contents: list[str]) -> None:
     last = call.end_line
     if contents[last].endswith(','):
         contents[last] = contents[last][:-1]

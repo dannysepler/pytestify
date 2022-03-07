@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from pytestify.fixes.asserts import rewrite_asserts
