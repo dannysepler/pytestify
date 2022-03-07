@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from pytestify.fixes.imports import add_pytest_import

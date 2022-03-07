@@ -1,4 +1,6 @@
-from typing import Iterable, List, Optional
+from __future__ import annotations
+
+from typing import Iterable
 
 from tokenize_rt import Token
 
@@ -19,14 +21,14 @@ def remove_token(
     return before + replace_with + after
 
 
-def operators(tokens: List[Token]) -> Iterable[Token]:
+def operators(tokens: list[Token]) -> Iterable[Token]:
     return (tok for tok in tokens if tok.name == 'OP')
 
 
 def find_outer_comma(
-    tokens: List[Token],
+    tokens: list[Token],
     stack_loc: int = 1,
-) -> Optional[Token]:
+) -> Token | None:
     stack = 0
     for op in operators(tokens):
         if op.src in ['(', '[', '{']:
@@ -38,7 +40,7 @@ def find_outer_comma(
     return None
 
 
-def find_closing_paren(paren: Token, tokens: List[Token]) -> Token:
+def find_closing_paren(paren: Token, tokens: list[Token]) -> Token:
     found_paren = False
     stack = 1
     for op in operators(tokens):

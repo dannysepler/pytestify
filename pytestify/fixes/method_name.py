@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import ast
 import re
-from typing import Dict
 
 from pytestify._ast_helpers import NodeVisitor
 
@@ -20,7 +21,7 @@ class Visitor(NodeVisitor):
     def __init__(self, *, keep_casing: bool = False) -> None:
         self.keep_casing = keep_casing
         self.known_rewrites = REWRITES.copy()
-        self.to_rewrite: Dict[int, str] = {}
+        self.to_rewrite: dict[int, str] = {}
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
         if node.name in self.known_rewrites:

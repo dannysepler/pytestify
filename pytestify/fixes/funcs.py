@@ -1,12 +1,14 @@
+from __future__ import annotations
+
 import ast
 import re
-from typing import NamedTuple, Optional, Set
+from typing import NamedTuple
 
 from pytestify._ast_helpers import NodeVisitor
 
 
 class Func(NamedTuple):
-    name: Optional[str]
+    name: str | None
     in_decorator: str = ''
 
     @property
@@ -16,7 +18,7 @@ class Func(NamedTuple):
         return self.name
 
     @property
-    def decorator(self) -> Optional[str]:
+    def decorator(self) -> str | None:
         return self.in_decorator or self.name
 
 
@@ -36,7 +38,7 @@ REWRITES = {
 
 class Visitor(NodeVisitor):
     def __init__(self) -> None:
-        self.calls: Set[int] = set()
+        self.calls: set[int] = set()
 
         # strip off punctuation when checking if func name should be rewritten
         self.rewrites = [re.sub(r'[^\w\s]', '', f) for f in REWRITES]

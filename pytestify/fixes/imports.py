@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import ast
 
 from pytestify._ast_helpers import NodeVisitor, imports_pytest
