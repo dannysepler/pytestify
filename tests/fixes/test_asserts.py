@@ -33,7 +33,7 @@ from pytestify.fixes.asserts import rewrite_asserts
         ('self.assertIsInstance(a, b)', 'assert isinstance(a, b)'),
         ('self.assertAlmostEquals(a, b)', 'assert a == pytest.approx(b)'),
         (
-            # The following two check that the placement of the parenthesis
+            # The next two cases check the placement of the parenthesis
             'self.assertAlmostEquals(a, b, msg="Error")',
             'assert a == pytest.approx(b), "Error"',
         ),

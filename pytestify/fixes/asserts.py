@@ -178,8 +178,8 @@ class Visitor(NodeVisitor):
         end_line = close_paren.line
         self.calls.append(
             Call(
-                method, line - 1, call_idx, end_line -
-                1, commas, call.keywords, **kwargs
+                method, line - 1, call_idx, end_line - 1,
+                commas, call.keywords, **kwargs
             ),
         )
 
