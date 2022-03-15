@@ -229,6 +229,39 @@ def combine_assert(call: Call, content_list: list[str]) -> bool:
         return False
 
 
+def add_suffix(call: Call, content_list: list[str], suffix: str) -> None:
+    second_comma = call.commas[1]
+    if second_comma:
+        # The suffix should be added BEFORE a second comma, such as...
+        # self.assertCountEqual(a, b, 'my error')
+        #
+        # should be...
+        # assert sorted(a) == sorted(b), 'my error'
+
+        call_contents = '\n'.join(
+            content_list[call.line:call.end_line + 1],
+        )
+        # Hacky workaround, since it seems we can't tokenize on code
+        # that's not syntactically correct
+        if (
+            # We don't try to infer where to drop the suffix in if...
+            # 1. There's more than one comma in the code
+            len(call_contents.split(',')) > 2 or
+            # 2. There are keywords _besides_ "msg"
+            len({k.arg for k in call.keywords} - {'msg'}) > 0
+        ):
+            content_list[call.end_line] += suffix
+        else:
+            call_contents = call_contents.replace(',', suffix + ',')
+            i = 0
+            for line in range(call.line, call.end_line + 1):
+                content_list[line] = call_contents.split('\n')[i]
+                i += 1
+    else:
+        new_line = content_list[call.end_line] + suffix
+        content_list[call.end_line] = new_line
+
+
 def add_slashes(call: Call, content_list: list[str]) -> None:
     contents = '\n'.join(content_list[call.line: call.end_line + 1])
     try:
@@ -382,37 +415,7 @@ def rewrite_asserts(contents: str, *, keep_count_equal: bool = False) -> str:
             call.end_line -= 1
 
         if assert_type.suffix:
-            suffix = assert_type.suffix
-            second_comma = call.commas[1]
-            if second_comma:
-                # The suffix should be added BEFORE a second comma, such as...
-                # self.assertCountEqual(a, b, 'my error')
-                #
-                # should be...
-                # assert sorted(a) == sorted(b), 'my error'
-
-                call_contents = '\n'.join(
-                    content_list[call.line:call.end_line + 1],
-                )
-                # Hacky workaround, since it seems we can't tokenize on code
-                # that's not syntactically correct
-                if (
-                    # We don't try to infer where to drop the suffix in if...
-                    # 1. There's more than one comma in the code
-                    len(call_contents.split(',')) > 2 or
-                    # 2. There are keywords _besides_ "msg"
-                    len({k.arg for k in call.keywords} - {'msg'}) > 0
-                ):
-                    content_list[call.end_line] += suffix
-                else:
-                    call_contents = call_contents.replace(',', suffix + ',')
-                    i = 0
-                    for line in range(call.line, call.end_line + 1):
-                        content_list[line] = call_contents.split('\n')[i]
-                        i += 1
-            else:
-                new_line = content_list[call.end_line] + suffix
-                content_list[call.end_line] = new_line
+            add_suffix(call, content_list, assert_type.suffix)
 
         did_combine = combine_assert(call, content_list)
         line_offset += int(did_combine) + int(deleted_end_line)
