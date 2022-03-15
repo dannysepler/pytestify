@@ -44,7 +44,7 @@ def _fix_path(
         contents = remove_base_class(orig_contents)
         contents = rewrite_asserts(
             contents,
-            with_count_equal=args.with_count_equal,
+            keep_count_equal=args.keep_count_equal,
         )
 
         is_unittest_file = _no_ws(contents) != _no_ws(orig_contents)
@@ -81,7 +81,7 @@ def _fix_path(
 def main(argv: Sequence[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument('filepaths', nargs='*')
-    parser.add_argument('--with-count-equal', action='store_true')
+    parser.add_argument('--keep-count-equal', action='store_true')
     parser.add_argument('--show-traceback', action='store_true')
     parser.add_argument('--keep-method-casing', action='store_true')
     args = parser.parse_args(argv)

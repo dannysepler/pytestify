@@ -28,6 +28,9 @@ def operators(tokens: list[Token]) -> Iterable[Token]:
 def find_outer_comma(
     tokens: list[Token],
     stack_loc: int = 1,
+    # TODO: rather than a 'comma_no' arg, it may be nice if this
+    # func returns a list
+    comma_no: int = 1,
 ) -> Token | None:
     stack = 0
     for op in operators(tokens):
@@ -36,7 +39,9 @@ def find_outer_comma(
         if op.src in [')', ']', '}']:
             stack -= 1
         if op.src == ',' and stack <= stack_loc:
-            return op
+            comma_no -= 1
+            if comma_no == 0:
+                return op
     return None
 
 

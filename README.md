@@ -27,7 +27,7 @@ or
 **Optional arguments**
 
 - [--keep-method-casing](#camelCase-to-snake_case)
-- [--with-count-equal](#assertCountEqual)
+- [--keep-count-equal](#assertCountEqual)
 
 Please read over all changes that pytestify makes. It's a new
 package, so there are bound to be issues.
@@ -128,9 +128,7 @@ def testHTTPThing(self):  # def test_httpthing(self):
 
 ### assertCountEqual
 
-Since they're risky, the following two are opt-in.
-
-(Use `pytest path/to/file --with-count-equal`).
+Disable this behavior with `pytest path/to/file --keep-count-equal`.
 
 ```python
 self.assertItemsEqual(a, b)  # assert sorted(a) == sorted(b)

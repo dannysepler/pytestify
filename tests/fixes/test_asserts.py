@@ -33,6 +33,15 @@ from pytestify.fixes.asserts import rewrite_asserts
         ('self.assertIsInstance(a, b)', 'assert isinstance(a, b)'),
         ('self.assertAlmostEquals(a, b)', 'assert a == pytest.approx(b)'),
         (
+            # The next two cases check the placement of the parenthesis
+            'self.assertAlmostEquals(a, b, msg="Error")',
+            'assert a == pytest.approx(b), "Error"',
+        ),
+        (
+            'self.assertAlmostEquals(a, b, "Error")',
+            'assert a == pytest.approx(b), "Error"',
+        ),
+        (
             'self.assertAlmostEquals(a, b, places=2)',
             'assert a == pytest.approx(b, abs=0.01)',
         ),
@@ -271,16 +280,16 @@ def test_remove_msg_param(before, after):
 
 
 @pytest.mark.parametrize(
-    'before, with_count_equal, after', [
+    'before, keep_count_equal, after', [
         # opted-out
-        ('self.assertItemsEqual(a, b)', False, 'self.assertItemsEqual(a, b)'),
-        ('self.assertCountEqual(a, b)', False, 'self.assertCountEqual(a, b)'),
+        ('self.assertItemsEqual(a, b)', True, 'self.assertItemsEqual(a, b)'),
+        ('self.assertCountEqual(a, b)', True, 'self.assertCountEqual(a, b)'),
         (
             'self.assertItemsEqual(\n'
             '    a,\n'
             '    b\n'
             ')',
-            False,
+            True,
             'self.assertItemsEqual(\n'
             '    a,\n'
             '    b\n'
@@ -291,23 +300,49 @@ def test_remove_msg_param(before, after):
             '    a,\n'
             '    b\n'
             ')',
-            False,
+            True,
             'self.assertCountEqual(\n'
             '    a,\n'
             '    b\n'
+            ')',
+        ),
+        (
+            'self.assertCountEqual(\n'
+            '    a,\n'
+            '    b,\n'
+            '    "some error message"\n'
+            ')',
+            True,
+            'self.assertCountEqual(\n'
+            '    a,\n'
+            '    b,\n'
+            '    "some error message"\n'
             ')',
         ),
 
         # opted-in
-        ('self.assertItemsEqual(a, b)', True, 'assert sorted(a) == sorted(b)'),
-        ('self.assertCountEqual(a, b)', True, 'assert sorted(a) == sorted(b)'),
+        (
+            'self.assertItemsEqual(a, b)',
+            False,
+            'assert sorted(a) == sorted(b)',
+        ),
+        (
+            'self.assertCountEqual(a, b)',
+            False,
+            'assert sorted(a) == sorted(b)',
+        ),
+        (
+            'self.assertCountEqual(a, b, "error")', False,
+            'assert sorted(a) == sorted(b), "error"',
+        ),
+
         # TODO: better format the following multilines
         (
             'self.assertItemsEqual(\n'
             '    a,\n'
             '    b\n'
             ')',
-            True,
+            False,
             'assert sorted(\n'
             '    a) == sorted(\n'
             '    b)',
@@ -317,15 +352,15 @@ def test_remove_msg_param(before, after):
             '    a,\n'
             '    b\n'
             ')',
-            True,
+            False,
             'assert sorted(\n'
             '    a) == sorted(\n'
             '    b)',
         ),
     ],
 )
-def test_opt_in_rewrites(before, with_count_equal, after):
-    assert rewrite_asserts(before, with_count_equal=with_count_equal) == after
+def test_opt_in_rewrites(before, keep_count_equal, after):
+    assert rewrite_asserts(before, keep_count_equal=keep_count_equal) == after
 
 
 @pytest.mark.parametrize(
