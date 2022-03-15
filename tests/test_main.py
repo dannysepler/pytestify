@@ -51,3 +51,19 @@ def camelCaseButNotTest():
 
     assert f.read_text() == orig_contents
     assert ret == 0
+
+
+class TestCliArgs:
+    def test_keep_count_equal(self, f):
+        f.write_text('self.assertCountEqual(a, b)\n')
+        ret = main([str(f), '--keep-count-equal'])
+
+        assert f.read_text() == 'self.assertCountEqual(a, b)\n'
+        assert ret == 0
+
+    def test_dont_keep_count_equal(self, f):
+        f.write_text('self.assertCountEqual(a, b)\n')
+        ret = main([str(f)])
+
+        assert f.read_text() == 'assert sorted(a) == sorted(b)\n'
+        assert ret == 1

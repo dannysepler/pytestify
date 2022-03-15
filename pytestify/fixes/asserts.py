@@ -100,6 +100,8 @@ class Call:
         line: int,
         token_idx: int,
         end_line: int,
+        commas: list[Token],
+        keywords: list[ast.keyword],
         places: int | None = None,
         delta: int | None = None,
     ):
@@ -107,9 +109,11 @@ class Call:
         self.line = line
         self.token_idx = token_idx
         self.end_line = end_line
-        self.offset = 0
+        self.commas = commas
+        self.keywords = keywords
         self.places = places
         self.delta = delta
+        self.offset = 0
 
     @property
     def line_length(self) -> int:
@@ -147,6 +151,10 @@ class Visitor(NodeVisitor):
             if i >= call_idx and t.name == 'OP'
         ]
         open_paren = next(t for t in operators if t.src == '(')
+        commas = [
+            find_outer_comma(operators, comma_no=1),
+            find_outer_comma(operators, comma_no=2),
+        ]
         close_paren = find_closing_paren(open_paren, operators)
         kwargs = {}
         for keyword in call.keywords or []:
@@ -169,7 +177,10 @@ class Visitor(NodeVisitor):
                     kwargs[arg] = const.n  # type: ignore
         end_line = close_paren.line
         self.calls.append(
-            Call(method, line - 1, call_idx, end_line - 1, **kwargs),
+            Call(
+                method, line - 1, call_idx, end_line -
+                1, commas, call.keywords, **kwargs
+            ),
         )
 
 
@@ -306,14 +317,14 @@ def remove_trailing_comma(call: Call, contents: list[str]) -> None:
         contents[last] = contents[last][:-1]
 
 
-def rewrite_asserts(contents: str, *, with_count_equal: bool = False) -> str:
+def rewrite_asserts(contents: str, *, keep_count_equal: bool = False) -> str:
     tokens = src_to_tokens(contents)
     visitor = Visitor(tokens).visit_text(contents)
     content_list = contents.splitlines()
 
     line_offset = 0
     for call in visitor.calls:
-        if not with_count_equal and call.name in (
+        if keep_count_equal and call.name in (
             'assertCountEqual', 'assertItemsEqual',
         ):
             continue
@@ -325,7 +336,7 @@ def rewrite_asserts(contents: str, *, with_count_equal: bool = False) -> str:
             if i > call.token_idx and tok.name == 'OP'
         ]
 
-        comma = find_outer_comma(ops_after)
+        comma = call.commas[0]
         deleted_end_line = rewrite_parens(ops_after, call, content_list, comma)
         remove_msg_param(call, content_list)
         remove_trailing_comma(call, content_list)
@@ -370,10 +381,38 @@ def rewrite_asserts(contents: str, *, with_count_equal: bool = False) -> str:
         if not content_list[call.end_line].strip():
             call.end_line -= 1
 
-        suffix = assert_type.suffix
-        end_line = content_list[call.end_line]
-        end_line += suffix
-        content_list[call.end_line] = end_line
+        if assert_type.suffix:
+            suffix = assert_type.suffix
+            second_comma = call.commas[1]
+            if second_comma:
+                # The suffix should be added BEFORE a second comma, such as...
+                # self.assertCountEqual(a, b, 'my error')
+                #
+                # should be...
+                # assert sorted(a) == sorted(b), 'my error'
+
+                call_contents = '\n'.join(
+                    content_list[call.line:call.end_line + 1],
+                )
+                # Hacky workaround, since it seems we can't tokenize on code
+                # that's not syntactically correct
+                if (
+                    # We don't try to infer where to drop the suffix in if...
+                    # 1. There's more than one comma in the code
+                    len(call_contents.split(',')) > 2 or
+                    # 2. There are keywords _besides_ "msg"
+                    len({k.arg for k in call.keywords} - {'msg'}) > 0
+                ):
+                    content_list[call.end_line] += suffix
+                else:
+                    call_contents = call_contents.replace(',', suffix + ',')
+                    i = 0
+                    for line in range(call.line, call.end_line + 1):
+                        content_list[line] = call_contents.split('\n')[i]
+                        i += 1
+            else:
+                new_line = content_list[call.end_line] + suffix
+                content_list[call.end_line] = new_line
 
         did_combine = combine_assert(call, content_list)
         line_offset += int(did_combine) + int(deleted_end_line)
