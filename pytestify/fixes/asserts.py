@@ -258,8 +258,7 @@ def add_suffix(call: Call, content_list: list[str], suffix: str) -> None:
                 content_list[line] = call_contents.split('\n')[i]
                 i += 1
     else:
-        new_line = content_list[call.end_line] + suffix
-        content_list[call.end_line] = new_line
+        content_list[call.end_line] = content_list[call.end_line] + suffix
 
 
 def add_slashes(call: Call, content_list: list[str]) -> None:
