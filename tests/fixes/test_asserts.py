@@ -357,6 +357,18 @@ def test_remove_msg_param(before, after):
             '    a) == sorted(\n'
             '    b)',
         ),
+        (
+            'self.assertCountEqual(\n'
+            '    a,\n'
+            '    b,\n'
+            '    msg="Error"\n'
+            ')',
+            False,
+            'assert sorted(\n'
+            '    a) == sorted(\n'
+            '    b), \\\n'
+            '    "Error"',
+        ),
     ],
 )
 def test_opt_in_rewrites(before, keep_count_equal, after):
