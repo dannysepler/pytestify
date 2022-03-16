@@ -3,6 +3,7 @@ from __future__ import annotations
 import ast
 import re
 import sys
+from dataclasses import dataclass, field
 from tokenize import TokenError
 from typing import NamedTuple
 
@@ -93,27 +94,18 @@ for alias, orig in ALIASES.items():
     ASSERT_TYPES[alias] = ASSERT_TYPES[orig]
 
 
+@dataclass
 class Call:
-    def __init__(
-        self,
-        name: str,
-        line: int,
-        token_idx: int,
-        end_line: int,
-        commas: list[Token],
-        keywords: list[ast.keyword],
-        places: int | None = None,
-        delta: int | None = None,
-    ):
-        self.name = name
-        self.line = line
-        self.token_idx = token_idx
-        self.end_line = end_line
-        self.commas = commas
-        self.keywords = keywords
-        self.places = places
-        self.delta = delta
-        self.offset = 0
+    name: str
+    line: int
+    token_idx: int
+    end_line: int
+    commas: list[Token]
+    keywords: list[ast.keyword]
+    places: int | None = None
+    delta: int | None = None
+    offset: int = 0
+    kwargs: dict[str, str] = field(default_factory=dict)
 
     @property
     def line_length(self) -> int:
@@ -178,8 +170,13 @@ class Visitor(NodeVisitor):
         end_line = close_paren.line
         self.calls.append(
             Call(
-                method, line - 1, call_idx, end_line - 1,
-                commas, call.keywords, **kwargs
+                name=method,
+                line=line - 1,
+                token_idx=call_idx,
+                end_line=end_line - 1,
+                commas=commas,
+                keywords=call.keywords,
+                **kwargs
             ),
         )
 
@@ -241,13 +238,13 @@ def add_suffix(call: Call, content_list: list[str], suffix: str) -> None:
         call_contents = '\n'.join(
             content_list[call.line:call.end_line + 1],
         )
-        # Hacky workaround, since it seems we can't tokenize on code
+        # Hacky workaround, since we can't tokenize code
         # that's not syntactically correct
         if (
-            # We don't try to infer where to drop the suffix in if...
-            # 1. There's more than one comma in the code
+            # We don't try to infer the suffix location if...
+            # 1. There's more than one comma
             len(call_contents.split(',')) > 2 or
-            # 2. There are keywords _besides_ "msg"
+            # 2. There are keywords _besides_ 'msg'
             len({k.arg for k in call.keywords} - {'msg'}) > 0
         ):
             content_list[call.end_line] += suffix
