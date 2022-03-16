@@ -14,9 +14,9 @@ def ast_parse(contents: str) -> ast.Module:
 def is_valid_syntax(contents: str) -> bool:
     try:
         ast_parse(contents)
+        return True
     except SyntaxError:
         return False
-    return True
 
 
 class NodeVisitor(ast.NodeVisitor):

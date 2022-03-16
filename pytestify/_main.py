@@ -62,9 +62,10 @@ def _fix_path(
             contents += '\n'
 
     except SyntaxError:
-        reason = 'due to the source file having invalid syntax'
         if is_valid:
             reason = 'because of an issue with pytestify'
+        else:
+            reason = 'due to the source file having invalid syntax'
         print(f'Skipping {path} {reason}')
         notes.any_invalid_syntax = True
         if args.show_traceback:
@@ -91,10 +92,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     for filepath in args.filepaths:
         ret += _fix_path(filepath, args, notes)
     if notes.any_invalid_syntax and not args.show_traceback:
-        print(
-            '\n(Hint: to show the full traceback, '
-            "run again with '--show-traceback')",
-        )
+        print("\n(Hint: run again with '--show-traceback')")
     return ret
 
 
