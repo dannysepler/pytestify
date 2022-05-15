@@ -346,14 +346,14 @@ def remove_trailing_comma(call: Call, contents: list[str]) -> None:
         contents[last] = contents[last][:-1]
 
 
-def rewrite_asserts(contents: str, *, keep_count_equal: bool = False) -> str:
+def rewrite_asserts(contents: str, *, with_count_equal: bool = False) -> str:
     tokens = src_to_tokens(contents)
     visitor = Visitor(tokens).visit_text(contents)
     content_list = contents.splitlines()
 
     line_offset = 0
     for call in visitor.calls:
-        if keep_count_equal and call.name in (
+        if not with_count_equal and call.name in (
             'assertCountEqual', 'assertItemsEqual',
         ):
             continue
