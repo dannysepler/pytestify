@@ -6,8 +6,7 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [1.4.0] - March 15th 2022
 
-- Rewrite count equal by default, rename from `--with-count-equal` to `--keep-count-equal`
-- Fixes #27: Suffixes were being added after the `msg=` parameter which was causing breaks
+- _This release has been yanked, since it was buggy._
 
 ## [1.3.2] - December 29th 2021
 

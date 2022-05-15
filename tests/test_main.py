@@ -54,16 +54,16 @@ def camelCaseButNotTest():
 
 
 class TestCliArgs:
-    def test_keep_count_equal(self, f):
+    def test_rewrites_count_equal(self, f):
         f.write_text('self.assertCountEqual(a, b)\n')
-        ret = main([str(f), '--keep-count-equal'])
-
-        assert f.read_text() == 'self.assertCountEqual(a, b)\n'
-        assert ret == 0
-
-    def test_dont_keep_count_equal(self, f):
-        f.write_text('self.assertCountEqual(a, b)\n')
-        ret = main([str(f)])
+        ret = main([str(f), '--with-count-equal'])
 
         assert f.read_text() == 'assert sorted(a) == sorted(b)\n'
         assert ret == 1
+
+    def test_doesnt_rewrite_count_equal(self, f):
+        f.write_text('self.assertCountEqual(a, b)\n')
+        ret = main([str(f)])
+
+        assert f.read_text() == 'self.assertCountEqual(a, b)\n'
+        assert ret == 0

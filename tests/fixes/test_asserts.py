@@ -280,16 +280,16 @@ def test_remove_msg_param(before, after):
 
 
 @pytest.mark.parametrize(
-    'before, keep_count_equal, after', [
+    'before, with_count_equal, after', [
         # opted-out
-        ('self.assertItemsEqual(a, b)', True, 'self.assertItemsEqual(a, b)'),
-        ('self.assertCountEqual(a, b)', True, 'self.assertCountEqual(a, b)'),
+        ('self.assertItemsEqual(a, b)', False, 'self.assertItemsEqual(a, b)'),
+        ('self.assertCountEqual(a, b)', False, 'self.assertCountEqual(a, b)'),
         (
             'self.assertItemsEqual(\n'
             '    a,\n'
             '    b\n'
             ')',
-            True,
+            False,
             'self.assertItemsEqual(\n'
             '    a,\n'
             '    b\n'
@@ -300,7 +300,7 @@ def test_remove_msg_param(before, after):
             '    a,\n'
             '    b\n'
             ')',
-            True,
+            False,
             'self.assertCountEqual(\n'
             '    a,\n'
             '    b\n'
@@ -312,7 +312,7 @@ def test_remove_msg_param(before, after):
             '    b,\n'
             '    "some error message"\n'
             ')',
-            True,
+            False,
             'self.assertCountEqual(\n'
             '    a,\n'
             '    b,\n'
@@ -323,16 +323,16 @@ def test_remove_msg_param(before, after):
         # opted-in
         (
             'self.assertItemsEqual(a, b)',
-            False,
+            True,
             'assert sorted(a) == sorted(b)',
         ),
         (
             'self.assertCountEqual(a, b)',
-            False,
+            True,
             'assert sorted(a) == sorted(b)',
         ),
         (
-            'self.assertCountEqual(a, b, "error")', False,
+            'self.assertCountEqual(a, b, "error")', True,
             'assert sorted(a) == sorted(b), "error"',
         ),
 
@@ -342,7 +342,7 @@ def test_remove_msg_param(before, after):
             '    a,\n'
             '    b\n'
             ')',
-            False,
+            True,
             'assert sorted(\n'
             '    a) == sorted(\n'
             '    b)',
@@ -352,7 +352,7 @@ def test_remove_msg_param(before, after):
             '    a,\n'
             '    b\n'
             ')',
-            False,
+            True,
             'assert sorted(\n'
             '    a) == sorted(\n'
             '    b)',
@@ -363,7 +363,7 @@ def test_remove_msg_param(before, after):
             '    b,\n'
             '    msg="Error"\n'
             ')',
-            False,
+            True,
             'assert sorted(\n'
             '    a) == sorted(\n'
             '    b), \\\n'
@@ -371,8 +371,8 @@ def test_remove_msg_param(before, after):
         ),
     ],
 )
-def test_opt_in_rewrites(before, keep_count_equal, after):
-    assert rewrite_asserts(before, keep_count_equal=keep_count_equal) == after
+def test_opt_in_rewrites(before, with_count_equal, after):
+    assert rewrite_asserts(before, with_count_equal=with_count_equal) == after
 
 
 @pytest.mark.parametrize(
