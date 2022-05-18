@@ -165,6 +165,12 @@ def test_rewrite_simple_asserts(before, after):
             "    'a': 1,\n"
             '}',
         ),
+        (
+            'self.assertIsInstance(x, y)\n'
+            'self.assertIsInstance(x, y)',
+            'assert isinstance(x, y)\n'
+            'assert isinstance(x, y)',
+        ),
     ],
 )
 def test_rewrite_complex_asserts(before, after):
