@@ -148,6 +148,9 @@ class Visitor(NodeVisitor):
             find_outer_comma(operators, comma_no=2),
         ]
         close_paren = find_closing_paren(open_paren, operators)
+        if commas[1] and commas[1].line > close_paren.line:
+            commas[1] = None
+
         kwargs = {}
         for keyword in call.keywords or []:
             if keyword.arg in ['places', 'delta']:
