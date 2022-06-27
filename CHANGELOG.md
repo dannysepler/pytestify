@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [1.4.1] - May 18th 2022
 
-- Bugfix: Closing parantheses were placed in the wrong location. ([#35](https://github.com/dannysepler/pytestify/issues/35))
+- Bugfix: Closing parentheses were placed in the wrong location. ([#35](https://github.com/dannysepler/pytestify/issues/35))
 
 
 ## [1.4.0] - March 15th 2022
