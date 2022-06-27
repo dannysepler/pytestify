@@ -191,8 +191,8 @@ def rewrite_parens(
     comma: Token | None,
 ) -> bool:
     '''
-    For single line asserts, remove parantheses
-    For multi-line asserts, convert parantheses to slashes
+    For single line asserts, remove parentheses
+    For multi-line asserts, convert parentheses to slashes
     '''
     open_paren = next(t for t in operators if t.src == '(')
     closing_paren = find_closing_paren(open_paren, operators)
