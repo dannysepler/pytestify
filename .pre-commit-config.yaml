@@ -11,6 +11,10 @@ repos:
     rev: v1.20.1
     hooks:
     -   id: setup-cfg-fmt
+-   repo: https://github.com/codespell-project/codespell
+    rev: v2.1.0
+    hooks:
+    -   id: codespell
 -   repo: https://github.com/PyCQA/flake8
     rev: 4.0.1
     hooks:
