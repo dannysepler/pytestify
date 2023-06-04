@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file. This projec
 
 ## [Unreleased]
 
+
+## [1.5.0] - June 3rd 2023
+
+- Bugfix: assertAlmostEquals breaks if there are comments. ([#46](https://github.com/dannysepler/pytestify/issues/46))
+
 ## [1.4.1] - May 18th 2022
 
 - Bugfix: Closing parentheses were placed in the wrong location. ([#35](https://github.com/dannysepler/pytestify/issues/35))
