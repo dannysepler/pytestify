@@ -33,6 +33,10 @@ from pytestify.fixes.asserts import rewrite_asserts
         ('self.assertIsInstance(a, b)', 'assert isinstance(a, b)'),
         ('self.assertAlmostEquals(a, b)', 'assert a == pytest.approx(b)'),
         (
+            'self.assertAlmostEquals(a, b) # hi',
+            'assert a == pytest.approx(b) # hi',
+        ),
+        (
             # The next two cases check the placement of the parenthesis
             'self.assertAlmostEquals(a, b, msg="Error")',
             'assert a == pytest.approx(b), "Error"',
@@ -262,6 +266,24 @@ def test_rewrite_complex_asserts(before, after):
             'assert a == pytest.approx(\n'
             '   b,\n'
             '   abs=2)',
+        ),
+        (
+            'self.assertAlmostEquals(\n'
+            '   a,\n'
+            '   b # hi\n'
+            ')',
+            'assert a == pytest.approx(\n'
+            '   b) # hi',
+        ),
+        (
+            'self.assertAlmostEquals( # comment a\n'
+            '   a,\n'
+            '   b # comment b\n'
+            ')',
+            # NOTE: this isn't actually valid syntax
+            'assert \\  # comment a\n'
+            '   a == pytest.approx(\n'
+            '   b) # comment b',
         ),
         (
             'self.assertEquals(\n'
