@@ -238,8 +238,7 @@ def combine_assert(call: Call, content_list: list[str]) -> bool:
 def add_suffix(call: Call, content_list: list[str], suffix: str) -> None:
     for comment in call.comments:
         if (
-            call.line <= comment.line - 1
-            and comment.line - 1 <= call.end_line
+            call.end_line == comment.line - 1
             and comment.src in content_list[call.end_line]
         ):
             content_list[call.end_line] = (

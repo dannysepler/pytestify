@@ -276,6 +276,16 @@ def test_rewrite_complex_asserts(before, after):
             '   b) # hi',
         ),
         (
+            'self.assertAlmostEquals( # comment a\n'
+            '   a,\n'
+            '   b # comment b\n'
+            ')',
+            # NOTE: this isn't actually valid syntax
+            'assert \\  # comment a\n'
+            '   a == pytest.approx(\n'
+            '   b) # comment b',
+        ),
+        (
             'self.assertEquals(\n'
             '   [\n'
             '       1,\n'
