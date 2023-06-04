@@ -101,6 +101,7 @@ class Call:
     token_idx: int
     end_line: int
     commas: list[Token]
+    comments: list[Token]
     keywords: list[ast.keyword]
     places: int | None = None
     delta: int | None = None
@@ -138,6 +139,10 @@ class Visitor(NodeVisitor):
             if tok.src == method and tok.line == line
         )
 
+        comments = [
+            t for i, t in enumerate(self.tokens)
+            if i >= call_idx and t.name == 'COMMENT'
+        ]
         operators = [
             t for i, t in enumerate(self.tokens)
             if i >= call_idx and t.name == 'OP'
@@ -177,6 +182,7 @@ class Visitor(NodeVisitor):
                 line=line - 1,
                 token_idx=call_idx,
                 end_line=end_line - 1,
+                comments=comments,
                 commas=commas,
                 keywords=call.keywords,
                 **kwargs
@@ -230,6 +236,17 @@ def combine_assert(call: Call, content_list: list[str]) -> bool:
 
 
 def add_suffix(call: Call, content_list: list[str], suffix: str) -> None:
+    for comment in call.comments:
+        if (
+            call.line <= comment.line - 1
+            and comment.line - 1 <= call.end_line
+            and comment.src in content_list[call.end_line]
+        ):
+            content_list[call.end_line] = (
+                content_list[call.end_line].replace(comment.src, '').rstrip()
+            )
+            suffix += ' ' + comment.src
+
     second_comma = call.commas[1]
     if second_comma:
         # The suffix should be added BEFORE a second comma, such as...
