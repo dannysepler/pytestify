@@ -34,7 +34,7 @@ from pytestify.fixes.asserts import rewrite_asserts
         ('self.assertAlmostEquals(a, b)', 'assert a == pytest.approx(b)'),
         (
             'self.assertAlmostEquals(a, b) # hi',
-            'assert a == pytest.approx(b) # hi'
+            'assert a == pytest.approx(b) # hi',
         ),
         (
             # The next two cases check the placement of the parenthesis
