@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import ast
 import re
-import sys
 from dataclasses import dataclass, field
 from tokenize import TokenError
 from typing import NamedTuple
@@ -180,7 +179,9 @@ class Visitor(NodeVisitor):
                 comments=comments,
                 commas=commas,
                 keywords=call.keywords,
-                **kwargs
+                # The below line triggers a mypy issue,
+                # see https://github.com/python/mypy/issues/5382.
+                **kwargs  # type: ignore
             ),
         )
 
