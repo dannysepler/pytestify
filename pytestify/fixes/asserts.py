@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import ast
 import re
-import sys
 from dataclasses import dataclass, field
 from tokenize import TokenError
 from typing import NamedTuple
@@ -169,12 +168,7 @@ class Visitor(NodeVisitor):
                     # still rewrite it, but without specially handling it
                     continue
 
-                const = keyword.value
-                if sys.version_info >= (3, 8):
-                    kwargs[arg] = const.value  # type: ignore
-                else:
-                    # Prior to Python 3.8, const is actually a ast.Num object
-                    kwargs[arg] = const.n  # type: ignore
+                kwargs[arg] = keyword.value.value
         end_line = close_paren.line
         self.calls.append(
             Call(
@@ -185,7 +179,9 @@ class Visitor(NodeVisitor):
                 comments=comments,
                 commas=commas,
                 keywords=call.keywords,
-                **kwargs
+                # The below line triggers a mypy issue,
+                # see https://github.com/python/mypy/issues/5382.
+                **kwargs  # type: ignore
             ),
         )
 
