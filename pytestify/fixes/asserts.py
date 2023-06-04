@@ -168,7 +168,7 @@ class Visitor(NodeVisitor):
                     # still rewrite it, but without specially handling it
                     continue
 
-                kwargs[arg] = keyword.value
+                kwargs[arg] = keyword.value.value
         end_line = close_paren.line
         self.calls.append(
             Call(
