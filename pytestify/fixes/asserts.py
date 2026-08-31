@@ -185,7 +185,7 @@ class Visitor(NodeVisitor):
                 comments=comments,
                 commas=commas,
                 keywords=call.keywords,
-                **kwargs
+                **kwargs,
             ),
         )
 
